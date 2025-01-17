@@ -34,6 +34,10 @@ protected:
 	/* Play Animation Montage */
 	void PlayRollMontage();
 
+	/* Animation Notify*/
+	UFUNCTION(BlueprintCallable)
+	void RollEnd();
+
 private:	
 	/*Animation Montage*/
 	UPROPERTY(EditDefaultsOnly, Category = Montages)

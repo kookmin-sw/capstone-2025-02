@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABSCharacter::ABSCharacter()
@@ -18,12 +19,17 @@ ABSCharacter::ABSCharacter()
 void ABSCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 void ABSCharacter::Roll()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ROLL"));
+	FVector MovingDirection = GetVelocity();
+	if (MovingDirection.Normalize())
+	{
+		SetActorRotation(MovingDirection.Rotation());
+	}
+
 	PlayRollMontage();
 }
 
@@ -35,6 +41,10 @@ void ABSCharacter::PlayRollMontage()
 	{
 		AnimInstance->Montage_Play(RollMontage);
 	}
+}
+
+void ABSCharacter::RollEnd()
+{
 }
 
 // Called every frame
@@ -52,7 +62,6 @@ void ABSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Triggered, this, &ABSCharacter::Roll);
-		UE_LOG(LogTemp, Warning, TEXT("SETUP"));
 	}
 }
 
