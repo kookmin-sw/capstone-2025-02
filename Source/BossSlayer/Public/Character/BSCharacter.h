@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Character/CharacterStates.h"
 #include "BSCharacter.generated.h"
+
+class UInputAction;
 
 UCLASS()
 class BOSSSLAYER_API ABSCharacter : public ACharacter
@@ -22,14 +25,19 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
+	/* Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	class UInputAction* RollAction;
+	UInputAction* RollAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UInputAction* LockOnAction;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	/* Input Callback */
 	void Roll();
+	void LockOn();
 
 	/* Play Animation Montage */
 	void PlayRollMontage();
@@ -39,7 +47,21 @@ protected:
 	void RollEnd();
 
 private:	
+	/* Component */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UGameplayCameraComponent* GameplayCamera;
+
 	/*Animation Montage*/
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* RollMontage;
+
+	/* State*/
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	ECharacterState CharacterState;
+
+
+	/* For Lock On */
+	UPROPERTY()
+	AActor* LockOnTarget;
+	bool bLockingOn;
 };
