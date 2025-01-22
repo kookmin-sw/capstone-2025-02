@@ -28,6 +28,33 @@ void ABSCharacter::BeginPlay()
 	bLockingOn = false;
 }
 
+// Called every frame
+void ABSCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (LockOnTarget)
+	{
+		if (AController* MyController = GetController())
+		{
+			FRotator NewRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockOnTarget->GetActorLocation());
+			MyController->SetControlRotation(NewRot);
+		}
+	}
+}
+
+// Called to bind functionality to input
+void ABSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Triggered, this, &ABSCharacter::Roll);
+		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &ABSCharacter::LockOn);
+	}
+}
+
 void ABSCharacter::Roll()
 {
 	if (CharacterState != ECharacterState::ECS_Neutral)
@@ -53,11 +80,37 @@ void ABSCharacter::LockOn()
 {
 	if (!bLockingOn)
 	{
-		//TODO
+		if (AController* MyController = GetController())
+		{
+			FVector Start = GetActorLocation();
+			FVector End = Start + MyController->GetControlRotation().Vector() * 1000.f;
+
+			FHitResult Result;
+			TArray<AActor*> ActorsToIgnore;
+			ActorsToIgnore.Add(this);
+			TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+			ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+
+			if (UWorld* World = GetWorld())
+			{
+				if (UKismetSystemLibrary::SphereTraceSingleForObjects(World, Start, End, 300.f, ObjectTypes, false,
+					ActorsToIgnore, EDrawDebugTrace::None, Result, true))
+				{
+					bLockingOn = true;
+					LockOnTarget = Result.GetActor();
+
+					UE_LOG(LogTemp, Warning, TEXT("LOCK ON"));
+				}
+			}
+		}
 	}
 	else
 	{
-		//TODO
+		bLockingOn = false;
+		LockOnTarget = nullptr;
+
+		UE_LOG(LogTemp, Warning, TEXT("LOCK OFF"));
+
 	}
 }
 
@@ -72,22 +125,4 @@ void ABSCharacter::PlayRollMontage()
 }
 
 
-// Called every frame
-void ABSCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
-void ABSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Triggered, this, &ABSCharacter::Roll);
-		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &ABSCharacter::LockOn);
-	}
-}
 

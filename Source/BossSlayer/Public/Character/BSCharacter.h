@@ -63,5 +63,6 @@ private:
 	/* For Lock On */
 	UPROPERTY()
 	AActor* LockOnTarget;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bLockingOn;
 };
