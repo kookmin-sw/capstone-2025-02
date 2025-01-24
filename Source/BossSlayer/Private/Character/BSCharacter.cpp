@@ -8,6 +8,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/GameplayCameraComponent.h"
+#include "Utils/Debug.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 ABSCharacter::ABSCharacter()
@@ -26,6 +28,8 @@ void ABSCharacter::BeginPlay()
 
 	CharacterState = ECharacterState::ECS_Neutral;
 	bLockingOn = false;
+
+	ComboCounter = 0;
 }
 
 // Called every frame
@@ -52,28 +56,53 @@ void ABSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	{
 		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Triggered, this, &ABSCharacter::Roll);
 		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &ABSCharacter::LockOn);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ABSCharacter::Attack);
+		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ABSCharacter::Sprint);
 	}
 }
 
 void ABSCharacter::Roll()
 {
-	if (CharacterState != ECharacterState::ECS_Neutral)
+	if (CharacterState == ECharacterState::ECS_Sprinting)
 		return;
+
+	if (CharacterState != ECharacterState::ECS_Neutral)
+	{
+		StoreInputToBuffer(RollAction);
+		return;
+	}
 
 	CharacterState = ECharacterState::ECS_Rolling;
 
-	FVector MovingDirection = GetVelocity();
-	if (MovingDirection.Normalize())
-	{
-		SetActorRotation(MovingDirection.Rotation());
-	}
+	Debug::LogScreen(TEXT("ROLL START"));
+
+	FVector Direction = GetLastMovementInputVector();
+	SetActorRotation(Direction.Rotation());
 
 	PlayRollMontage();
 }
 
+
+void ABSCharacter::PlayRollMontage()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && RollMontage)
+	{
+		AnimInstance->Montage_Play(RollMontage);
+	}
+}
+
 void ABSCharacter::RollEnd()
 {
+	Debug::LogScreen(TEXT("ROLL END"));
+
 	CharacterState = ECharacterState::ECS_Neutral;
+
+	if (InputBuffer != nullptr)
+	{
+		ExecuteInputFromBuffer();
+	}
 }
 
 void ABSCharacter::LockOn()
@@ -98,8 +127,6 @@ void ABSCharacter::LockOn()
 				{
 					bLockingOn = true;
 					LockOnTarget = Result.GetActor();
-
-					UE_LOG(LogTemp, Warning, TEXT("LOCK ON"));
 				}
 			}
 		}
@@ -108,21 +135,118 @@ void ABSCharacter::LockOn()
 	{
 		bLockingOn = false;
 		LockOnTarget = nullptr;
-
-		UE_LOG(LogTemp, Warning, TEXT("LOCK OFF"));
-
 	}
 }
 
-void ABSCharacter::PlayRollMontage()
+void ABSCharacter::Attack()
+{
+	if (CharacterState != ECharacterState::ECS_Neutral)
+	{
+		StoreInputToBuffer(AttackAction);
+		return;
+	}
+
+	Debug::LogScreen(TEXT("ATTACK START"));
+
+	CharacterState = ECharacterState::ECS_Attacking;
+
+	if (AController* MyController = GetController())
+	{
+		FVector Direction = MyController->GetControlRotation().Vector();
+		SetActorRotation(Direction.Rotation());
+	}
+
+	PlayAttackMontage();
+}
+
+void ABSCharacter::PlayAttackMontage()
+{
+	if (AttackMontage)
+	{
+		Debug::LogScreen(FString::Printf(TEXT("ComboCounter : %d"), ComboCounter));
+		PlayMontageBySection(AttackMontage, AttackMontageSections[ComboCounter]);
+		ComboCounter++;
+
+		if (ComboCounter >= AttackMontageSections.Num())
+			ComboCounter = 0;
+	}
+}
+
+void ABSCharacter::AttackEnd()
+{
+	Debug::LogScreen(TEXT("ATTACK END"));
+
+	CharacterState = ECharacterState::ECS_Neutral;
+
+	if (InputBuffer != nullptr)
+	{
+		if (InputBuffer != AttackAction)
+			ComboCounter = 0;
+
+		ExecuteInputFromBuffer();
+	}
+	else
+	{
+		ComboCounter = 0;
+	}
+}
+
+void ABSCharacter::PlayMontageBySection(UAnimMontage* Montage, const FName& SectionName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-	if (AnimInstance && RollMontage)
+	if (AnimInstance && Montage)
 	{
-		AnimInstance->Montage_Play(RollMontage);
+		AnimInstance->Montage_Play(Montage);
+		AnimInstance->Montage_JumpToSection(SectionName, Montage);
+	}
+}
+
+void ABSCharacter::Sprint(const FInputActionValue& Value)
+{
+	bool bSprinting = Value.Get<bool>();
+
+	Debug::LogScreen(TEXT("SPRINT"));
+
+	if (bSprinting)
+	{
+		Debug::LogScreen(TEXT("SPRINT START"));
+		CharacterState = ECharacterState::ECS_Sprinting;
+	}
+	else
+	{
+		if (CharacterState == ECharacterState::ECS_Sprinting)
+		{
+			Debug::LogScreen(TEXT("SPRINT END"));
+			CharacterState = ECharacterState::ECS_Neutral;
+		}
 	}
 }
 
 
+void ABSCharacter::StoreInputToBuffer(UInputAction* InputAction)
+{
+	InputBuffer = InputAction;
+	Debug::LogScreen(TEXT("Stored Input To Buffer"));
+}
 
+void ABSCharacter::ExecuteInputFromBuffer()
+{
+	Debug::LogScreen(TEXT("Executing Input From Buffer"));
+
+	CharacterState = ECharacterState::ECS_Neutral;
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			TArray<UInputModifier*> Modifiers;
+			TArray<UInputTrigger*> Triggers;
+
+			if(InputBuffer == AttackAction)
+				Debug::LogScreen(TEXT("Is to attack"));
+			Subsystem->InjectInputForAction(InputBuffer, FInputActionValue(true), Modifiers, Triggers);
+			InputBuffer = nullptr;
+		}
+	}
+}
