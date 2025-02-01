@@ -9,6 +9,7 @@
 
 class UInputAction;
 struct FInputActionValue;
+class APlayerWeapon;
 
 UCLASS()
 class BOSSSLAYER_API ABSCharacter : public ACharacter
@@ -47,7 +48,9 @@ protected:
 
 	/* Play Animation Montage */
 	void PlayRollMontage();
-	void PlayAttackMontage();
+	void PlayComboAttackMontage();
+	void PlaySprintAttackMontage();
+	void PlayRollAttackMontage();
 	void PlayMontageBySection(UAnimMontage* Montage, const FName& SectionName);
 
 	/* For Animation Notify*/
@@ -69,7 +72,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* RollMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
-	UAnimMontage* AttackMontage;
+	UAnimMontage* ComboAttackMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* SprintAttackMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* RollAttackMontage;
 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TArray<FName> AttackMontageSections;
@@ -78,6 +85,7 @@ private:
 	/* State*/
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	ECharacterState CharacterState;
+	ECharacterState PrevCharacterState;
 
 	/* For Lock On */
 	UPROPERTY()
@@ -89,4 +97,11 @@ private:
 	UInputAction* InputBuffer;
 
 	bool bIsSprinting;
+
+	/* Weapon */
+	UPROPERTY()
+	APlayerWeapon* PlayerWeapon;
+
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<APlayerWeapon> PlayerWeaponClass;
 };

@@ -10,6 +10,7 @@
 #include "GameFramework/GameplayCameraComponent.h"
 #include "Utils/Debug.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Items/PlayerWeapon.h"
 
 // Sets default values
 ABSCharacter::ABSCharacter()
@@ -30,6 +31,16 @@ void ABSCharacter::BeginPlay()
 	bLockingOn = false;
 
 	ComboCounter = 0;
+
+	if (UWorld* World = GetWorld())
+	{
+		if (PlayerWeaponClass)
+		{
+			PlayerWeapon = World->SpawnActor<APlayerWeapon>(PlayerWeaponClass);
+			PlayerWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName("WeaponSocket"));
+			PlayerWeapon->SetOwner(this);
+		}
+	}
 }
 
 // Called every frame
@@ -45,6 +56,14 @@ void ABSCharacter::Tick(float DeltaTime)
 			MyController->SetControlRotation(NewRot);
 		}
 	}
+
+	if (CharacterState == ECharacterState::ECS_Neutral)
+	{
+		if(InputBuffer != nullptr)
+			ExecuteInputFromBuffer();
+	}
+
+	//Debug::LogScreen(FString::Printf(TEXT("Curr State : %d"), CharacterState));
 }
 
 // Called to bind functionality to input
@@ -63,7 +82,7 @@ void ABSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void ABSCharacter::Roll()
 {
-	if (CharacterState == ECharacterState::ECS_Sprinting)
+	if (bIsSprinting)
 		return;
 
 	if (CharacterState != ECharacterState::ECS_Neutral)
@@ -98,11 +117,7 @@ void ABSCharacter::RollEnd()
 	Debug::LogScreen(TEXT("ROLL END"));
 
 	CharacterState = ECharacterState::ECS_Neutral;
-
-	if (InputBuffer != nullptr)
-	{
-		ExecuteInputFromBuffer();
-	}
+	PrevCharacterState = ECharacterState::ECS_Rolling;
 }
 
 void ABSCharacter::LockOn()
@@ -140,6 +155,8 @@ void ABSCharacter::LockOn()
 
 void ABSCharacter::Attack()
 {
+	Debug::LogScreen(TEXT("ATTACK"));
+
 	if (CharacterState != ECharacterState::ECS_Neutral)
 	{
 		StoreInputToBuffer(AttackAction);
@@ -150,25 +167,25 @@ void ABSCharacter::Attack()
 
 	CharacterState = ECharacterState::ECS_Attacking;
 
-	if (AController* MyController = GetController())
+	if (bLockingOn)
 	{
-		FVector Direction = MyController->GetControlRotation().Vector();
-		SetActorRotation(Direction.Rotation());
+		if (AController* MyController = GetController())
+		{
+			FRotator NewRot = FRotator(0.f, MyController->GetControlRotation().Yaw, 0.f);
+			SetActorRotation(NewRot);
+		}
 	}
 
-	PlayAttackMontage();
-}
-
-void ABSCharacter::PlayAttackMontage()
-{
-	if (AttackMontage)
+	if (PrevCharacterState == ECharacterState::ECS_Rolling)
 	{
-		Debug::LogScreen(FString::Printf(TEXT("ComboCounter : %d"), ComboCounter));
-		PlayMontageBySection(AttackMontage, AttackMontageSections[ComboCounter]);
-		ComboCounter++;
-
-		if (ComboCounter >= AttackMontageSections.Num())
-			ComboCounter = 0;
+		PlayRollAttackMontage();
+	}
+	else
+	{
+		if (bIsSprinting)
+			PlaySprintAttackMontage();
+		else
+			PlayComboAttackMontage();
 	}
 }
 
@@ -177,17 +194,50 @@ void ABSCharacter::AttackEnd()
 	Debug::LogScreen(TEXT("ATTACK END"));
 
 	CharacterState = ECharacterState::ECS_Neutral;
+	PrevCharacterState = ECharacterState::ECS_Attacking;
 
-	if (InputBuffer != nullptr)
+	if (InputBuffer == AttackAction) // 후속 공격은 여기서 직접 처리
 	{
-		if (InputBuffer != AttackAction)
-			ComboCounter = 0;
-
-		ExecuteInputFromBuffer();
+		InputBuffer = nullptr;
+		Attack();
 	}
 	else
 	{
 		ComboCounter = 0;
+	}
+}
+
+void ABSCharacter::PlayComboAttackMontage()
+{
+	Debug::LogScreen(TEXT("COMBO ATTACK MONTAGE"));
+	if (ComboAttackMontage)
+	{
+		Debug::LogScreen(FString::Printf(TEXT("ComboCounter : %d"), ComboCounter));
+		PlayMontageBySection(ComboAttackMontage, AttackMontageSections[ComboCounter]);
+		ComboCounter++;
+
+		if (ComboCounter >= AttackMontageSections.Num())
+			ComboCounter = 0;
+	}
+}
+
+void ABSCharacter::PlaySprintAttackMontage()
+{
+	Debug::LogScreen(TEXT("SPRINT ATTACK MONTAGE"));
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && SprintAttackMontage)
+	{
+		AnimInstance->Montage_Play(SprintAttackMontage);
+	}
+}
+
+void ABSCharacter::PlayRollAttackMontage()
+{
+	Debug::LogScreen(TEXT("ROLL ATTACK MONTAGE"));
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && RollAttackMontage)
+	{
+		AnimInstance->Montage_Play(RollAttackMontage);
 	}
 }
 
@@ -204,21 +254,21 @@ void ABSCharacter::PlayMontageBySection(UAnimMontage* Montage, const FName& Sect
 
 void ABSCharacter::Sprint(const FInputActionValue& Value)
 {
-	bool bSprinting = Value.Get<bool>();
+	bool bToSprint = Value.Get<bool>();
 
 	Debug::LogScreen(TEXT("SPRINT"));
 
-	if (bSprinting)
+	if (bToSprint)
 	{
 		Debug::LogScreen(TEXT("SPRINT START"));
-		CharacterState = ECharacterState::ECS_Sprinting;
+		bIsSprinting = true;
 	}
 	else
 	{
-		if (CharacterState == ECharacterState::ECS_Sprinting)
+		if (bIsSprinting)
 		{
 			Debug::LogScreen(TEXT("SPRINT END"));
-			CharacterState = ECharacterState::ECS_Neutral;
+			bIsSprinting = false;
 		}
 	}
 }
@@ -232,21 +282,23 @@ void ABSCharacter::StoreInputToBuffer(UInputAction* InputAction)
 
 void ABSCharacter::ExecuteInputFromBuffer()
 {
+	if (!InputBuffer)
+		return;
+
 	Debug::LogScreen(TEXT("Executing Input From Buffer"));
 
 	CharacterState = ECharacterState::ECS_Neutral;
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	if (APlayerController* PC = Cast<APlayerController>(Controller))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
 		{
-			TArray<UInputModifier*> Modifiers;
-			TArray<UInputTrigger*> Triggers;
+			UEnhancedPlayerInput* PlayerInput = Subsystem->GetPlayerInput();
 
-			if(InputBuffer == AttackAction)
-				Debug::LogScreen(TEXT("Is to attack"));
-			Subsystem->InjectInputForAction(InputBuffer, FInputActionValue(true), Modifiers, Triggers);
+			FInputActionValue ActionValue(true);
+			PlayerInput->InjectInputForAction(InputBuffer, ActionValue);
+			Debug::LogScreen(TEXT("Input Injection Finished"));
 			InputBuffer = nullptr;
 		}
-	}
+	}	
 }
