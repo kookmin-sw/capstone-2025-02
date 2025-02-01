@@ -2,26 +2,54 @@
 
 
 #include "Enemy/Enemy.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Weapons/BSWeapon.h"
+#include "GameFunctionLibrary.h"
+#include "Character/CharacterStates.h"
 
 AEnemy::AEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(FName("Weapon Mesh"));
-	FAttachmentTransformRules Rules(EAttachmentRule::SnapToTarget, true);
-	WeaponMesh->AttachToComponent(GetMesh(), Rules, "RightHandSocket");
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
 
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+
+
+	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetGenerateOverlapEvents(true);
 
 }
 
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	SpawnAndEquipWeapon();
+}
+
+void AEnemy::SpawnAndEquipWeapon()
+{
+
+	if (WeaponClass)
+	{
+		Weapon = GetWorld()->SpawnActor<ABSWeapon>(WeaponClass);
+
+		if (Weapon)
+		{
+			Weapon->AttachMeshToSocket(GetMesh(), "RightHandSocket");
+		}
+	}
 }
 
 void AEnemy::Attack()
@@ -33,7 +61,13 @@ void AEnemy::Attack()
 
 void AEnemy::PlayHitReactMontage(const FName& SectionName)
 {
-	// To do
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && HitReactMontage)
+	{
+		AnimInstance->Montage_Play(HitReactMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, HitReactMontage);
+	}
 }
 
 void AEnemy::PlayAttackMontage(const FName& SectionName)
@@ -56,11 +90,15 @@ void AEnemy::Tick(float DeltaTime)
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
-void AEnemy::GetHit()
+
+void AEnemy::GetHit_Implementation(AActor* InAttacker)
 {
-	// To do
+	float AngleDifference;
+	FName SectionName = UGameFunctionLibrary::ComputeHitReactDirection(InAttacker, this, AngleDifference);
+
+	PlayHitReactMontage(SectionName);
 }
+
 

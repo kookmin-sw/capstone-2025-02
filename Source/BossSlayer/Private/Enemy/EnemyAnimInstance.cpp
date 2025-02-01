@@ -28,8 +28,7 @@ void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	{
 		GroundSpeed = UKismetMathLibrary::VSizeXY(EnemyMovement->Velocity);
 
-		FRotator BaseRotation = EnemyCharacter->GetActorRotation();
-		Direction = CalculateDirection(EnemyMovement->Velocity, BaseRotation);
+		Direction = CalculateDirection(EnemyMovement->Velocity, EnemyCharacter->GetActorRotation());
 	}
 
 

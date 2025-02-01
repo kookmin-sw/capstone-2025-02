@@ -8,6 +8,8 @@
 #include "Enemy.generated.h"
 
 class UStaticMeshComponent;
+class UBoxComponent;
+class ABSWeapon;
 
 UCLASS()
 class BOSSSLAYER_API AEnemy : public ACharacter, public IHitInterface
@@ -18,11 +20,12 @@ public:
 	AEnemy();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-	virtual void GetHit() override;
+	virtual void GetHit_Implementation(AActor* InAttacker) override;
 
 protected:
 	virtual void BeginPlay() override;
+
+	void SpawnAndEquipWeapon();
 
 	UFUNCTION(BlueprintCallable)
 	void Attack();
@@ -31,11 +34,18 @@ protected:
 	void PlayAttackMontage(const FName& SectionName);
 
 private:
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* WeaponMesh;
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<ABSWeapon> WeaponClass;
 
+	ABSWeapon* Weapon;
+
+	/** Montage */
 	UPROPERTY(EditAnywhere, Category = "Montages")
 	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Montages")
+	UAnimMontage* HitReactMontage;
+
 
 };
 
