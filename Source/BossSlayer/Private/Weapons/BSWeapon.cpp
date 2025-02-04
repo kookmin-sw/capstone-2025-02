@@ -4,9 +4,10 @@
 #include "Components/BoxComponent.h"
 #include "Interfaces/HitInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Components/SceneComponent.h"
 
 
-ABSWeapon::ABSWeapon()
+ABSWeapon::ABSWeapon()			
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -16,13 +17,19 @@ ABSWeapon::ABSWeapon()
 	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	CollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
-	CollisionBox->SetupAttachment(GetRootComponent());
-	CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	WeaponCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("CollisionBox"));
+	WeaponCollisionBox->SetupAttachment(GetRootComponent());
+	WeaponCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	WeaponCollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	WeaponCollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	WeaponCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ABSWeapon::OnCollisionBoxBeginOverlap);
 
-	CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ABSWeapon::OnCollisionBoxBeginOverlap);
+	BoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("BoxTraceStart"));
+	BoxTraceStart->SetupAttachment(GetRootComponent());
+
+	BoxTraceEnd = CreateDefaultSubobject<USceneComponent>(TEXT("BoxTraceEnd"));
+	BoxTraceEnd->SetupAttachment(GetRootComponent());
+
 }
 
 
@@ -30,16 +37,60 @@ void ABSWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ABSWeapon::OnCollisionBoxBeginOverlap);
+	WeaponCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &ABSWeapon::OnCollisionBoxBeginOverlap);
 
 }
 
 void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor))
+	if (OtherActor == GetOwner())
+		return;
+
+	FHitResult BoxHit;
+	BoxTrace(BoxHit);
+
+	if (BoxHit.GetActor())
 	{
-		HitInterface->GetHit(GetOwner());
+		if (IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor))
+		{
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, TEXT("Success Hit"));
+			}
+			HitInterface->Execute_GetHit(BoxHit.GetActor(), GetOwner(), BoxHit.ImpactPoint);
+
+		}
 	}
+}
+
+void ABSWeapon::BoxTrace(FHitResult& BoxHit)
+{
+	const FVector Start = BoxTraceStart->GetComponentLocation();
+	const FVector End = BoxTraceEnd->GetComponentLocation();
+
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+	ActorsToIgnore.Add(GetOwner());
+
+	for (AActor* Actor : IgnoreActors)
+	{
+		ActorsToIgnore.AddUnique(Actor);
+	}
+
+	UKismetSystemLibrary::BoxTraceSingle(
+		this,
+		Start,
+		End,
+		FVector(15.f, 15.f, 15.f),
+		BoxTraceStart->GetComponentRotation(),
+		ETraceTypeQuery::TraceTypeQuery1,
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::ForDuration,
+		BoxHit,
+		true
+	);
+	IgnoreActors.AddUnique(BoxHit.GetActor());
 }
 
 

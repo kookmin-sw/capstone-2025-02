@@ -16,11 +16,11 @@ APlayerWeapon::APlayerWeapon()
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetRootComponent(WeaponMesh);
 
-	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
+	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));	
 	WeaponBox->SetupAttachment(GetRootComponent());
 	WeaponBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	WeaponBox->SetCollisionResponseToAllChannels(ECR_Overlap);
-	WeaponBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	WeaponBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	BoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("BoxTraceStart"));
 	BoxTraceStart->SetupAttachment(GetRootComponent());
@@ -32,14 +32,14 @@ APlayerWeapon::APlayerWeapon()
 // Called when the game starts or when spawned
 void APlayerWeapon::BeginPlay()
 {
-	Super::BeginPlay();
+		Super::BeginPlay();
 	
 	WeaponBox->OnComponentBeginOverlap.AddDynamic(this, &APlayerWeapon::OnBoxOverlap);
 }
 
 void APlayerWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Debug::LogScreen(TEXT("ON BOX OVERLAP"));
+	//Debug::LogScreen(TEXT("ON BOX OVERLAP"));
 
 	const FVector Start = BoxTraceStart->GetComponentLocation();
 	const FVector End = BoxTraceStart->GetComponentLocation();
@@ -62,15 +62,15 @@ void APlayerWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		true
 	))
 	{
-		Debug::LogScreen(TEXT("BOX TRACE SUCCESS"));
+		//Debug::LogScreen(TEXT("BOX TRACE SUCCESS"));
 		if (HitResult.GetActor())
 			Debug::LogScreen(HitResult.GetActor()->GetName());
 	}
 	else
 	{
-		Debug::LogScreen(TEXT("BOX TRACE FAILED"));
+		//Debug::LogScreen(TEXT("BOX TRACE FAILED"));
 	}
-}
+}	
 
 // Called every frame
 void APlayerWeapon::Tick(float DeltaTime)

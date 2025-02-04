@@ -24,5 +24,5 @@ class BOSSSLAYER_API IHitInterface
 public:
 
 	UFUNCTION(BlueprintNativeEvent)
-	void GetHit(AActor* InAttacker);
+	void GetHit(AActor* InAttacker, FVector& ImpactPoint);
 };

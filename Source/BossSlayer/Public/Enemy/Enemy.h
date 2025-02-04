@@ -20,12 +20,16 @@ public:
 	AEnemy();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void GetHit_Implementation(AActor* InAttacker) override;
+	virtual void GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint) override;
 
 protected:
 	virtual void BeginPlay() override;
 
+
 	void SpawnAndEquipWeapon();
+
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
 
 	UFUNCTION(BlueprintCallable)
 	void Attack();

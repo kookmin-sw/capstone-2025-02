@@ -5,7 +5,7 @@
 #include "Character/CharacterStates.h"
 #include "Kismet/KismetMathLibrary.h"
 
-FName UGameFunctionLibrary::ComputeHitReactDirection(AActor* InAttacker, AActor* InVictim, float& OutAngleDifference)
+FName UGameFunctionLibrary::ComputeHitReactDirection(AActor* InAttacker, AActor* InVictim)
 {
 	check(InAttacker && InVictim);
 
@@ -13,7 +13,7 @@ FName UGameFunctionLibrary::ComputeHitReactDirection(AActor* InAttacker, AActor*
 	const FVector VictimToAttackerNormalized = (InAttacker->GetActorLocation() - InVictim->GetActorLocation()).GetSafeNormal();
 
 	const float DotResult = FVector::DotProduct(VictimForward, VictimToAttackerNormalized);
-	OutAngleDifference = UKismetMathLibrary::DegAcos(DotResult);
+	float OutAngleDifference = UKismetMathLibrary::DegAcos(DotResult);
 
 	const FVector CrossResult = FVector::CrossProduct(VictimForward, VictimToAttackerNormalized);
 
