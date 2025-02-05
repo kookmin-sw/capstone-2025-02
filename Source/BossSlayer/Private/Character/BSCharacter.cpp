@@ -62,8 +62,6 @@ void ABSCharacter::Tick(float DeltaTime)
 		if(InputBuffer != nullptr)
 			ExecuteInputFromBuffer();
 	}
-
-	//Debug::LogScreen(FString::Printf(TEXT("Curr State : %d"), CharacterState));
 }
 
 // Called to bind functionality to input
@@ -82,9 +80,6 @@ void ABSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void ABSCharacter::Roll()
 {
-	if (bIsSprinting)
-		return;
-
 	if (CharacterState != ECharacterState::ECS_Neutral)
 	{
 		StoreInputToBuffer(RollAction);
@@ -92,8 +87,6 @@ void ABSCharacter::Roll()
 	}
 
 	CharacterState = ECharacterState::ECS_Rolling;
-
-	Debug::LogScreen(TEXT("ROLL START"));
 
 	FVector Direction = GetLastMovementInputVector();
 	SetActorRotation(Direction.Rotation());
@@ -114,10 +107,7 @@ void ABSCharacter::PlayRollMontage()
 
 void ABSCharacter::RollEnd()
 {
-	Debug::LogScreen(TEXT("ROLL END"));
-
 	CharacterState = ECharacterState::ECS_Neutral;
-	PrevCharacterState = ECharacterState::ECS_Rolling;
 }
 
 void ABSCharacter::LockOn()
@@ -155,15 +145,11 @@ void ABSCharacter::LockOn()
 
 void ABSCharacter::Attack()
 {
-	Debug::LogScreen(TEXT("ATTACK"));
-
 	if (CharacterState != ECharacterState::ECS_Neutral)
 	{
 		StoreInputToBuffer(AttackAction);
 		return;
 	}
-
-	Debug::LogScreen(TEXT("ATTACK START"));
 
 	CharacterState = ECharacterState::ECS_Attacking;
 
@@ -176,14 +162,18 @@ void ABSCharacter::Attack()
 		}
 	}
 
-	if (PrevCharacterState == ECharacterState::ECS_Rolling)
+	if (StateBuffer == ECharacterState::ECS_Rolling)
 	{
 		PlayRollAttackMontage();
+		StateBuffer = ECharacterState::ECS_Neutral;
 	}
 	else
 	{
 		if (bIsSprinting)
+		{
 			PlaySprintAttackMontage();
+			Sprint(FInputActionValue(false));
+		}
 		else
 			PlayComboAttackMontage();
 	}
@@ -191,10 +181,7 @@ void ABSCharacter::Attack()
 
 void ABSCharacter::AttackEnd()
 {
-	Debug::LogScreen(TEXT("ATTACK END"));
-
 	CharacterState = ECharacterState::ECS_Neutral;
-	PrevCharacterState = ECharacterState::ECS_Attacking;
 
 	if (InputBuffer == AttackAction) // 후속 공격은 여기서 직접 처리
 	{
@@ -209,10 +196,8 @@ void ABSCharacter::AttackEnd()
 
 void ABSCharacter::PlayComboAttackMontage()
 {
-	Debug::LogScreen(TEXT("COMBO ATTACK MONTAGE"));
 	if (ComboAttackMontage)
 	{
-		Debug::LogScreen(FString::Printf(TEXT("ComboCounter : %d"), ComboCounter));
 		PlayMontageBySection(ComboAttackMontage, AttackMontageSections[ComboCounter]);
 		ComboCounter++;
 
@@ -223,7 +208,6 @@ void ABSCharacter::PlayComboAttackMontage()
 
 void ABSCharacter::PlaySprintAttackMontage()
 {
-	Debug::LogScreen(TEXT("SPRINT ATTACK MONTAGE"));
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && SprintAttackMontage)
 	{
@@ -233,7 +217,6 @@ void ABSCharacter::PlaySprintAttackMontage()
 
 void ABSCharacter::PlayRollAttackMontage()
 {
-	Debug::LogScreen(TEXT("ROLL ATTACK MONTAGE"));
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && RollAttackMontage)
 	{
@@ -252,22 +235,18 @@ void ABSCharacter::PlayMontageBySection(UAnimMontage* Montage, const FName& Sect
 	}
 }
 
-void ABSCharacter::Sprint(const FInputActionValue& Value)
+void ABSCharacter::Sprint_Implementation(const FInputActionValue& Value)
 {
 	bool bToSprint = Value.Get<bool>();
 
-	Debug::LogScreen(TEXT("SPRINT"));
-
 	if (bToSprint)
 	{
-		Debug::LogScreen(TEXT("SPRINT START"));
 		bIsSprinting = true;
 	}
 	else
 	{
 		if (bIsSprinting)
 		{
-			Debug::LogScreen(TEXT("SPRINT END"));
 			bIsSprinting = false;
 		}
 	}
@@ -277,15 +256,13 @@ void ABSCharacter::Sprint(const FInputActionValue& Value)
 void ABSCharacter::StoreInputToBuffer(UInputAction* InputAction)
 {
 	InputBuffer = InputAction;
-	Debug::LogScreen(TEXT("Stored Input To Buffer"));
+	StateBuffer = CharacterState;
 }
 
 void ABSCharacter::ExecuteInputFromBuffer()
 {
 	if (!InputBuffer)
 		return;
-
-	Debug::LogScreen(TEXT("Executing Input From Buffer"));
 
 	CharacterState = ECharacterState::ECS_Neutral;
 
@@ -297,7 +274,6 @@ void ABSCharacter::ExecuteInputFromBuffer()
 
 			FInputActionValue ActionValue(true);
 			PlayerInput->InjectInputForAction(InputBuffer, ActionValue);
-			Debug::LogScreen(TEXT("Input Injection Finished"));
 			InputBuffer = nullptr;
 		}
 	}	

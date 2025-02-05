@@ -44,6 +44,7 @@ protected:
 	void Roll();
 	void LockOn();
 	void Attack();
+	UFUNCTION(BlueprintNativeEvent)
 	void Sprint(const FInputActionValue& Value);
 
 	/* Play Animation Montage */
@@ -85,7 +86,7 @@ private:
 	/* State*/
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	ECharacterState CharacterState;
-	ECharacterState PrevCharacterState;
+	
 
 	/* For Lock On */
 	UPROPERTY()
@@ -93,9 +94,12 @@ private:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bLockingOn;
 
+	/* Input Buffer */
 	UPROPERTY()
 	UInputAction* InputBuffer;
+	ECharacterState StateBuffer;
 
+	/* Sprinting */
 	bool bIsSprinting;
 
 	/* Weapon */

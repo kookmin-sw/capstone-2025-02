@@ -39,7 +39,7 @@ void APlayerWeapon::BeginPlay()
 
 void APlayerWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Debug::LogScreen(TEXT("ON BOX OVERLAP"));
+	//Debug::LogScreen(TEXT("ON BOX OVERLAP"));
 
 	const FVector Start = BoxTraceStart->GetComponentLocation();
 	const FVector End = BoxTraceStart->GetComponentLocation();
@@ -62,13 +62,13 @@ void APlayerWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		true
 	))
 	{
-		Debug::LogScreen(TEXT("BOX TRACE SUCCESS"));
+		//Debug::LogScreen(TEXT("BOX TRACE SUCCESS"));
 		if (HitResult.GetActor())
 			Debug::LogScreen(HitResult.GetActor()->GetName());
 	}
 	else
 	{
-		Debug::LogScreen(TEXT("BOX TRACE FAILED"));
+		//Debug::LogScreen(TEXT("BOX TRACE FAILED"));
 	}
 }
 
