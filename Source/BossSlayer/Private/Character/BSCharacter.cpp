@@ -11,6 +11,8 @@
 #include "Utils/Debug.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Items/PlayerWeapon.h"
+#include "GameFunctionLibrary.h"
+#include "Weapons/BSWeapon.h"
 
 // Sets default values
 ABSCharacter::ABSCharacter()
@@ -20,6 +22,12 @@ ABSCharacter::ABSCharacter()
 
 	GameplayCamera = CreateDefaultSubobject<UGameplayCameraComponent>(TEXT("Camera"));
 	GameplayCamera->SetupAttachment(GetMesh());
+
+	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
+	GetMesh()->SetGenerateOverlapEvents(true);
 }
 
 // Called when the game starts or when spawned
@@ -36,7 +44,7 @@ void ABSCharacter::BeginPlay()
 	{
 		if (PlayerWeaponClass)
 		{
-			PlayerWeapon = World->SpawnActor<APlayerWeapon>(PlayerWeaponClass);
+			PlayerWeapon = World->SpawnActor<ABSWeapon>(PlayerWeaponClass);
 			PlayerWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName("WeaponSocket"));
 			PlayerWeapon->SetOwner(this);
 		}
@@ -76,6 +84,19 @@ void ABSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ABSCharacter::Attack);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ABSCharacter::Sprint);
 	}
+}
+
+void ABSCharacter::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
+{
+	FName SectionName = UGameFunctionLibrary::ComputeHitReactDirection(InAttacker, this);
+
+	if (GEngine)
+	{
+		FString Msg = FString::Printf(TEXT("SectionName: %s"), *SectionName.ToString());
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, Msg);
+	}
+
+	// HitReactMontage
 }
 
 void ABSCharacter::Roll()
@@ -145,11 +166,13 @@ void ABSCharacter::LockOn()
 
 void ABSCharacter::Attack()
 {
+
 	if (CharacterState != ECharacterState::ECS_Neutral)
 	{
 		StoreInputToBuffer(AttackAction);
 		return;
 	}
+
 
 	CharacterState = ECharacterState::ECS_Attacking;
 
@@ -181,6 +204,7 @@ void ABSCharacter::Attack()
 
 void ABSCharacter::AttackEnd()
 {
+
 	CharacterState = ECharacterState::ECS_Neutral;
 
 	if (InputBuffer == AttackAction) // 후속 공격은 여기서 직접 처리
@@ -196,6 +220,7 @@ void ABSCharacter::AttackEnd()
 
 void ABSCharacter::PlayComboAttackMontage()
 {
+
 	if (ComboAttackMontage)
 	{
 		PlayMontageBySection(ComboAttackMontage, AttackMontageSections[ComboCounter]);
@@ -208,6 +233,7 @@ void ABSCharacter::PlayComboAttackMontage()
 
 void ABSCharacter::PlaySprintAttackMontage()
 {
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && SprintAttackMontage)
 	{
@@ -217,6 +243,7 @@ void ABSCharacter::PlaySprintAttackMontage()
 
 void ABSCharacter::PlayRollAttackMontage()
 {
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && RollAttackMontage)
 	{

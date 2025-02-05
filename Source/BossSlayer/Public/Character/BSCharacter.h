@@ -5,14 +5,15 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Character/CharacterStates.h"
+#include "Interfaces/HitInterface.h"
 #include "BSCharacter.generated.h"
 
 class UInputAction;
 struct FInputActionValue;
-class APlayerWeapon;
+class ABSWeapon;
 
 UCLASS()
-class BOSSSLAYER_API ABSCharacter : public ACharacter
+class BOSSSLAYER_API ABSCharacter : public ACharacter, public IHitInterface
 {
 	GENERATED_BODY()
 
@@ -25,6 +26,10 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	//~ Begin IHitInterface Interface.
+	virtual void GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint) override;
+	//~ End IHitInterface Interface.
 
 protected:
 	/* Input Action */
@@ -104,8 +109,8 @@ private:
 
 	/* Weapon */
 	UPROPERTY()
-	APlayerWeapon* PlayerWeapon;
+	ABSWeapon* PlayerWeapon;
 
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<APlayerWeapon> PlayerWeaponClass;
+	TSubclassOf<ABSWeapon> PlayerWeaponClass;
 };

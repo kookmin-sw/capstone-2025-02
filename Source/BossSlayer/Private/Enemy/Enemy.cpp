@@ -11,6 +11,7 @@
 #include "Weapons/BSWeapon.h"
 #include "GameFunctionLibrary.h"
 #include "Character/CharacterStates.h"
+#include "Utils/Debug.h"
 
 AEnemy::AEnemy()
 {
@@ -48,7 +49,17 @@ void AEnemy::SpawnAndEquipWeapon()
 		if (Weapon)
 		{
 			Weapon->AttachMeshToSocket(GetMesh(), "RightHandSocket");
+			Weapon->SetOwner(this);
 		}
+	}
+}
+
+void AEnemy::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+{
+	if (Weapon && Weapon->GetWeaponCollisionBox())
+	{
+		Weapon->GetWeaponCollisionBox()->SetCollisionEnabled(CollisionEnabled);
+		Weapon->IgnoreActors.Empty();
 	}
 }
 
@@ -93,10 +104,15 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 }
 
 
-void AEnemy::GetHit_Implementation(AActor* InAttacker)
+void AEnemy::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 {
-	float AngleDifference;
-	FName SectionName = UGameFunctionLibrary::ComputeHitReactDirection(InAttacker, this, AngleDifference);
+	FName SectionName = UGameFunctionLibrary::ComputeHitReactDirection(InAttacker, this);
+
+	if (GEngine)
+	{
+		FString Msg = FString::Printf(TEXT("SectionName: %s"), *SectionName.ToString());
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, Msg);
+	}
 
 	PlayHitReactMontage(SectionName);
 }

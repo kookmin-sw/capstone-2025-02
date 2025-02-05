@@ -19,6 +19,6 @@ class BOSSSLAYER_API UGameFunctionLibrary : public UBlueprintFunctionLibrary
 public:
 
 	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
-	static FName ComputeHitReactDirection(AActor* InAttacker, AActor* InVictim, float& OutAngleDifference);
+	static FName ComputeHitReactDirection(AActor* InAttacker, AActor* InVictim);
 	
 };

@@ -19,6 +19,8 @@ public:
 	
 	void AttachMeshToSocket(USceneComponent* InParent, const FName& InSocketName);
 
+	TArray<AActor*> IgnoreActors;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -26,11 +28,22 @@ protected:
 	virtual void OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 
-
 private:
+
+	void BoxTrace(FHitResult& BoxHit);
+
 	UPROPERTY(VisibleAnywhere, Category = "Weapons")
 	UStaticMeshComponent* WeaponMesh;
 
 	UPROPERTY(VisibleAnywhere, Category = "Weapons")
-	UBoxComponent* CollisionBox;
+	UBoxComponent* WeaponCollisionBox;
+
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* BoxTraceStart;
+
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* BoxTraceEnd;
+
+public:
+	FORCEINLINE UBoxComponent* GetWeaponCollisionBox() const { return WeaponCollisionBox; }
 };

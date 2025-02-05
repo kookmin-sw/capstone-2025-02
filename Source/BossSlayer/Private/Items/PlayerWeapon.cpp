@@ -16,11 +16,11 @@ APlayerWeapon::APlayerWeapon()
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetRootComponent(WeaponMesh);
 
-	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));
+	WeaponBox = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponBox"));	
 	WeaponBox->SetupAttachment(GetRootComponent());
 	WeaponBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	WeaponBox->SetCollisionResponseToAllChannels(ECR_Overlap);
-	WeaponBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	WeaponBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	BoxTraceStart = CreateDefaultSubobject<USceneComponent>(TEXT("BoxTraceStart"));
 	BoxTraceStart->SetupAttachment(GetRootComponent());
@@ -32,7 +32,7 @@ APlayerWeapon::APlayerWeapon()
 // Called when the game starts or when spawned
 void APlayerWeapon::BeginPlay()
 {
-	Super::BeginPlay();
+		Super::BeginPlay();
 	
 	WeaponBox->OnComponentBeginOverlap.AddDynamic(this, &APlayerWeapon::OnBoxOverlap);
 }
@@ -70,7 +70,7 @@ void APlayerWeapon::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	{
 		//Debug::LogScreen(TEXT("BOX TRACE FAILED"));
 	}
-}
+}	
 
 // Called every frame
 void APlayerWeapon::Tick(float DeltaTime)
