@@ -10,9 +10,9 @@
 #include "GameFramework/GameplayCameraComponent.h"
 #include "Utils/Debug.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Items/PlayerWeapon.h"
 #include "GameFunctionLibrary.h"
 #include "Weapons/BSWeapon.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 ABSCharacter::ABSCharacter()
@@ -36,6 +36,10 @@ void ABSCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	CharacterState = ECharacterState::ECS_Neutral;
+
+	InputBuffer = nullptr;
+	StateBuffer = ECharacterState::ECS_Neutral;
+
 	bLockingOn = false;
 
 	ComboCounter = 0;
@@ -70,6 +74,8 @@ void ABSCharacter::Tick(float DeltaTime)
 		if(InputBuffer != nullptr)
 			ExecuteInputFromBuffer();
 	}
+
+	//Debug::LogScreen(FString::Printf(TEXT("%d"), bIsSprinting));
 }
 
 // Called to bind functionality to input
@@ -166,10 +172,9 @@ void ABSCharacter::LockOn()
 
 void ABSCharacter::Attack()
 {
-
 	if (CharacterState != ECharacterState::ECS_Neutral)
 	{
-		StoreInputToBuffer(AttackAction);
+		StoreInputToBuffer(AttackAction, true);
 		return;
 	}
 
@@ -280,10 +285,11 @@ void ABSCharacter::Sprint_Implementation(const FInputActionValue& Value)
 }
 
 
-void ABSCharacter::StoreInputToBuffer(UInputAction* InputAction)
+void ABSCharacter::StoreInputToBuffer(UInputAction* InputAction, bool bStoreState)
 {
 	InputBuffer = InputAction;
-	StateBuffer = CharacterState;
+	if(bStoreState)
+		StateBuffer = CharacterState;
 }
 
 void ABSCharacter::ExecuteInputFromBuffer()
@@ -304,4 +310,13 @@ void ABSCharacter::ExecuteInputFromBuffer()
 			InputBuffer = nullptr;
 		}
 	}	
+}
+
+void ABSCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
+{
+	if (PlayerWeapon && PlayerWeapon->GetWeaponCollisionBox())
+	{
+		PlayerWeapon->GetWeaponCollisionBox()->SetCollisionEnabled(CollisionEnabled);
+		PlayerWeapon->IgnoreActors.Empty();
+	}
 }

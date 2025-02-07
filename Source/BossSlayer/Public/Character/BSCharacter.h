@@ -66,8 +66,12 @@ protected:
 	void AttackEnd();
 
 	/* Input Buffering */
-	void StoreInputToBuffer(UInputAction* InputAction);
+	// bStoreState : 현재 CharacterState도 같이 저장할 것인지 (구르기->공격 등에 사용)
+	void StoreInputToBuffer(UInputAction* InputAction, bool bStoreState = false);
 	void ExecuteInputFromBuffer();
+
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
 
 private:	
 	/* Component */
@@ -105,6 +109,7 @@ private:
 	ECharacterState StateBuffer;
 
 	/* Sprinting */
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bIsSprinting;
 
 	/* Weapon */
