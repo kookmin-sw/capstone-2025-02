@@ -13,6 +13,7 @@
 #include "GameFunctionLibrary.h"
 #include "Weapons/BSWeapon.h"
 #include "Components/BoxComponent.h"
+#include "Components/PlayerAttribute.h"
 
 // Sets default values
 ABSCharacter::ABSCharacter()
@@ -28,6 +29,8 @@ ABSCharacter::ABSCharacter()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
 	GetMesh()->SetGenerateOverlapEvents(true);
+
+	Attribute = CreateDefaultSubobject<UPlayerAttribute>(TEXT("Attributes"));
 }
 
 // Called when the game starts or when spawned
@@ -68,11 +71,29 @@ void ABSCharacter::Tick(float DeltaTime)
 			MyController->SetControlRotation(NewRot);
 		}
 	}
-
-	if (CharacterState == ECharacterState::ECS_Neutral)
+	
+	if (CharacterState == ECharacterState::ECS_Neutral && !bIsSprinting)
 	{
 		if(InputBuffer != nullptr)
 			ExecuteInputFromBuffer();
+
+		if (Attribute)
+			Attribute->SetRecoverStamina(true);
+	}
+	else
+	{
+		if (Attribute)
+			Attribute->SetRecoverStamina(false);
+	}
+
+	if (bIsSprinting && Attribute)
+	{
+		Attribute->UseStamina(10.f * DeltaTime);
+
+		if (Attribute->GetCurrentStamina() <= 1.f)
+		{
+			Sprint(FInputActionValue(false));
+		}
 	}
 
 	//Debug::LogScreen(FString::Printf(TEXT("%d"), bIsSprinting));
@@ -111,6 +132,14 @@ void ABSCharacter::Roll()
 	{
 		StoreInputToBuffer(RollAction);
 		return;
+	}
+
+	if (Attribute)
+	{
+		if (Attribute->GetCurrentStamina() < 20.f)
+			return;
+
+		Attribute->UseStamina(20.f);
 	}
 
 	CharacterState = ECharacterState::ECS_Rolling;
@@ -178,6 +207,12 @@ void ABSCharacter::Attack()
 		return;
 	}
 
+	if (Attribute)
+	{
+		if (Attribute->GetCurrentStamina() < 20.f)
+			return;
+		Attribute->UseStamina(20.f);
+	}
 
 	CharacterState = ECharacterState::ECS_Attacking;
 
@@ -205,11 +240,12 @@ void ABSCharacter::Attack()
 		else
 			PlayComboAttackMontage();
 	}
+
+
 }
 
 void ABSCharacter::AttackEnd()
 {
-
 	CharacterState = ECharacterState::ECS_Neutral;
 
 	if (InputBuffer == AttackAction) // 후속 공격은 여기서 직접 처리
