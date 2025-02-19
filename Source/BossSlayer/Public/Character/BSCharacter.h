@@ -11,6 +11,7 @@
 class UInputAction;
 struct FInputActionValue;
 class ABSWeapon;
+class UPlayerAttribute;
 
 UCLASS()
 class BOSSSLAYER_API ABSCharacter : public ACharacter, public IHitInterface
@@ -118,4 +119,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<ABSWeapon> PlayerWeaponClass;
+
+	/* Attribute */
+	UPROPERTY(VisibleAnywhere)
+	UPlayerAttribute* Attribute;
 };
