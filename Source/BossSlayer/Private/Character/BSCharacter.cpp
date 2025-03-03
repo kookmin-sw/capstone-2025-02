@@ -14,6 +14,7 @@
 #include "Weapons/BSWeapon.h"
 #include "Components/BoxComponent.h"
 #include "Components/PlayerAttribute.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ABSCharacter::ABSCharacter()
@@ -115,7 +116,43 @@ void ABSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void ABSCharacter::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 {
-	FName SectionName = UGameFunctionLibrary::ComputeHitReactDirection(InAttacker, this);
+	FName SectionName = FName("FromFront");
+
+	FVector Origin;
+	FVector BoxExtent;
+	GetActorBounds(true, Origin, BoxExtent, false);
+
+	FVector Forward = GetActorForwardVector();
+	FVector OriginToImpactPoint = (ImpactPoint - Origin).GetSafeNormal();
+
+	DrawDebugLine(GetWorld(), Origin, ImpactPoint, FColor::Cyan, false, 3.f);
+
+	const float DotResult = FVector::DotProduct(Forward, OriginToImpactPoint);
+	float OutAngleDifference = UKismetMathLibrary::DegAcos(DotResult);
+
+	const FVector CrossResult = FVector::CrossProduct(Forward, OriginToImpactPoint);
+
+	if (CrossResult.Z < 0.f)
+	{
+		OutAngleDifference *= -1.f;
+	}
+
+	if (OutAngleDifference >= -45.f && OutAngleDifference <= 45.f)
+	{
+		SectionName = FName("FromFront");
+	}
+	else if (OutAngleDifference < -45.f && OutAngleDifference >= -135.f)
+	{
+		SectionName = FName("FromLeft");
+	}
+	else if (OutAngleDifference > 45.f && OutAngleDifference <= 135.f)
+	{
+		SectionName = FName("FromRight");
+	}
+	else
+	{
+		SectionName = FName("FromBack");
+	}
 
 	if (GEngine)
 	{
@@ -124,6 +161,15 @@ void ABSCharacter::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoin
 	}
 
 	// HitReactMontage
+	if (HitReactMontage)
+	{
+		DisableMovement();
+
+		// 타이머 이용해서 1초 후 스턴 풀리도록
+		FTimerHandle StunTimerHandle;
+		GetWorldTimerManager().SetTimer(StunTimerHandle, this, &ABSCharacter::EnableMovement, 1.f);
+		PlayMontageBySection(HitReactMontage, SectionName);
+	}
 }
 
 void ABSCharacter::Roll()
@@ -210,7 +256,11 @@ void ABSCharacter::Attack()
 	if (Attribute)
 	{
 		if (Attribute->GetCurrentStamina() < 20.f)
+		{
+			ComboCounter = 0;
+			StateBuffer = ECharacterState::ECS_Neutral;
 			return;
+		}
 		Attribute->UseStamina(20.f);
 	}
 

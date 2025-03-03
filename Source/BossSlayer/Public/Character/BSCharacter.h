@@ -74,6 +74,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
 
+	/* Enable/Disable Movement */
+	FORCEINLINE void EnableMovement() { Controller->SetIgnoreMoveInput(false); }
+	FORCEINLINE void DisableMovement() { Controller->SetIgnoreMoveInput(true); }
+
 private:	
 	/* Component */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -88,6 +92,8 @@ private:
 	UAnimMontage* SprintAttackMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* RollAttackMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* HitReactMontage;
 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TArray<FName> AttackMontageSections;
