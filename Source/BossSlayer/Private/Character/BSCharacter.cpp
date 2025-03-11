@@ -163,11 +163,9 @@ void ABSCharacter::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoin
 	// HitReactMontage
 	if (HitReactMontage)
 	{
-		DisableMovement();
+		EnableStun();
 
-		// 타이머 이용해서 1초 후 스턴 풀리도록
-		FTimerHandle StunTimerHandle;
-		GetWorldTimerManager().SetTimer(StunTimerHandle, this, &ABSCharacter::EnableMovement, 1.f);
+		GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &ABSCharacter::DisableStun);
 		PlayMontageBySection(HitReactMontage, SectionName);
 	}
 }
@@ -290,8 +288,6 @@ void ABSCharacter::Attack()
 		else
 			PlayComboAttackMontage();
 	}
-
-
 }
 
 void ABSCharacter::AttackEnd()
@@ -405,4 +401,20 @@ void ABSCharacter::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEn
 		PlayerWeapon->GetWeaponCollisionBox()->SetCollisionEnabled(CollisionEnabled);
 		PlayerWeapon->IgnoreActors.Empty();
 	}
+}
+
+void ABSCharacter::DisableStun(UAnimMontage* Montage, bool bInterrupted)
+{
+	Debug::LogScreen(TEXT("DISABLE STUN"));
+	GetMesh()->GetAnimInstance()->OnMontageEnded.Clear();
+
+	Controller->SetIgnoreMoveInput(false);
+	CharacterState = ECharacterState::ECS_Neutral;
+}
+
+void ABSCharacter::EnableStun()
+{
+	Debug::LogScreen(TEXT("ENABLE STUN"));
+	Controller->SetIgnoreMoveInput(true);
+	CharacterState = ECharacterState::ECS_Stunned;
 }

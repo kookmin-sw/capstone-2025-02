@@ -75,8 +75,10 @@ protected:
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
 
 	/* Enable/Disable Movement */
-	FORCEINLINE void EnableMovement() { Controller->SetIgnoreMoveInput(false); }
-	FORCEINLINE void DisableMovement() { Controller->SetIgnoreMoveInput(true); }
+	UFUNCTION()
+	void EnableStun();
+	UFUNCTION()
+	void DisableStun(UAnimMontage* Montage, bool bInterrupted);
 
 private:	
 	/* Component */

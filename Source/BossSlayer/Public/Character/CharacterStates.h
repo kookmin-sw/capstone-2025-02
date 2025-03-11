@@ -6,6 +6,7 @@ enum class ECharacterState : uint8
 	ECS_Neutral UMETA(DisplayName = "Neutral"),
 	ECS_Attacking UMETA(DisplayName = "Attacking"),
 	ECS_Rolling UMETA(DisplayName = "Rolling"),
+	ECS_Stunned UMETA(DisplayName = "Stunned"),
 };
 
 UENUM(BlueprintType)
