@@ -32,17 +32,9 @@ public:
 	virtual void GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint) override;
 	//~ End IHitInterface Interface.
 
-protected:
-	/* Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UInputAction* RollAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UInputAction* LockOnAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UInputAction* AttackAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UInputAction* SprintAction;
+	FORCEINLINE bool GetIsInvincible() { return bIsInvincible; }
 
+protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -79,6 +71,19 @@ protected:
 	void EnableStun();
 	UFUNCTION()
 	void DisableStun(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	FORCEINLINE void SetIsInvincible(bool Flag) { bIsInvincible = Flag; }
+
+	/* Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UInputAction* RollAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UInputAction* LockOnAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UInputAction* AttackAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UInputAction* SprintAction;
 
 private:	
 	/* Component */
@@ -131,4 +136,7 @@ private:
 	/* Attribute */
 	UPROPERTY(VisibleAnywhere)
 	UPlayerAttribute* Attribute;
+
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bIsInvincible;
 };

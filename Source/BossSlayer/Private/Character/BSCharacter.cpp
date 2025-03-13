@@ -116,6 +116,9 @@ void ABSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void ABSCharacter::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 {
+	if (GetIsInvincible())
+		return;
+
 	FName SectionName = FName("FromFront");
 
 	FVector Origin;
