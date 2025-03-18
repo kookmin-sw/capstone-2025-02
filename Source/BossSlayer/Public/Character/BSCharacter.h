@@ -86,7 +86,7 @@ protected:
 	UInputAction* SprintAction;
 
 private:	
-	/* Component */
+	/* Camera */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UGameplayCameraComponent* GameplayCamera;
 
@@ -111,11 +111,14 @@ private:
 	ECharacterState CharacterState;
 	
 
-	/* For Lock On */
+	/* Lock On */
 	UPROPERTY()
 	AActor* LockOnTarget;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bLockingOn;
+	float LockOnPitchMin;
+	float LockOnPitchMax;
+	float LockOnPitchFalloff;
 
 	/* Input Buffer */
 	UPROPERTY()

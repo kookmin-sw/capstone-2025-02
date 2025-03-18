@@ -32,6 +32,10 @@ ABSCharacter::ABSCharacter()
 	GetMesh()->SetGenerateOverlapEvents(true);
 
 	Attribute = CreateDefaultSubobject<UPlayerAttribute>(TEXT("Attributes"));
+
+	LockOnPitchMin = 10.f;
+	LockOnPitchMax = 35.f;
+	LockOnPitchFalloff = 0.03f;
 }
 
 // Called when the game starts or when spawned
@@ -66,9 +70,15 @@ void ABSCharacter::Tick(float DeltaTime)
 
 	if (LockOnTarget)
 	{
+
 		if (AController* MyController = GetController())
 		{
 			FRotator NewRot = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockOnTarget->GetActorLocation());
+			
+			float DistToEnemy = GetDistanceTo(LockOnTarget); 
+			float PitchOffset = LockOnPitchMax - DistToEnemy * LockOnPitchFalloff;
+			NewRot.Pitch -= FMath::Clamp(PitchOffset, LockOnPitchMin, LockOnPitchMax);
+
 			MyController->SetControlRotation(NewRot);
 		}
 	}
