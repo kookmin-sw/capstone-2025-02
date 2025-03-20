@@ -9,7 +9,19 @@
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
+<<<<<<< Updated upstream
 				"Engine"
+=======
+				"Engine",
+				"UMG",
+				"AIModule"
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
 			]
 		}
 	],

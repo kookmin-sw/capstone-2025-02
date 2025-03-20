@@ -29,13 +29,15 @@ protected:
 
 
 private:
-
 	void BoxTrace(FHitResult& BoxHit);
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapons")
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	float Damage = 15.f;
+
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	UStaticMeshComponent* WeaponMesh;
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapons")
+	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	UBoxComponent* WeaponCollisionBox;
 
 	UPROPERTY(VisibleAnywhere)
@@ -43,6 +45,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* BoxTraceEnd;
+
 
 public:
 	FORCEINLINE UBoxComponent* GetWeaponCollisionBox() const { return WeaponCollisionBox; }

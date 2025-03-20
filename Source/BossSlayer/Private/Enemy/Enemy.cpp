@@ -1,4 +1,4 @@
-
+	
 
 
 #include "Enemy/Enemy.h"
@@ -11,6 +11,9 @@
 #include "Weapons/BSWeapon.h"
 #include "GameFunctionLibrary.h"
 #include "Character/CharacterStates.h"
+#include "Components/AttributeComponent.h"
+#include "Components/WidgetComponent.h"
+#include "UI/BSHealthBarComponent.h"
 #include "Utils/Debug.h"
 
 AEnemy::AEnemy()
@@ -30,16 +33,25 @@ AEnemy::AEnemy()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetGenerateOverlapEvents(true);
 
+	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributesComponent"));
+	HealthBarComponent = CreateDefaultSubobject<UBSHealthBarComponent>(TEXT("HealthBarWidget"));
+	HealthBarComponent->SetupAttachment(GetRootComponent());
+
+
 }
 
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SpawnAndEquipWeapon();
 }
 
-void AEnemy::SpawnAndEquipWeapon()
+void AEnemy::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+}
+
+void AEnemy::SpawnAndEquipWeapon(const FName SocketName)
 {
 
 	if (WeaponClass)
@@ -48,8 +60,9 @@ void AEnemy::SpawnAndEquipWeapon()
 
 		if (Weapon)
 		{
-			Weapon->AttachMeshToSocket(GetMesh(), "RightHandSocket");
+			Weapon->AttachMeshToSocket(GetMesh(), SocketName);
 			Weapon->SetOwner(this);
+			Weapon->SetInstigator(this);
 		}
 	}
 }
@@ -115,6 +128,18 @@ void AEnemy::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 	}
 
 	PlayHitReactMontage(SectionName);
+}
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if (AttributeComponent && HealthBarComponent)
+	{
+		AttributeComponent->ReceiveDamage(DamageAmount);
+
+		HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
+		
+	}
+	return 0.0f;
 }
 
 

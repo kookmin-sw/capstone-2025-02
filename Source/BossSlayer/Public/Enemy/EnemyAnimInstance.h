@@ -30,5 +30,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	float GroundSpeed;
 
+	float PreviousGroundSpeed;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+	bool IsAccelerating;      
+
 };
 

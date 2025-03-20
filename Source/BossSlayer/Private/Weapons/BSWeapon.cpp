@@ -5,6 +5,7 @@
 #include "Interfaces/HitInterface.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Components/SceneComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 ABSWeapon::ABSWeapon()			
@@ -60,6 +61,14 @@ void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedCompon
 			HitInterface->Execute_GetHit(BoxHit.GetActor(), GetOwner(), BoxHit.ImpactPoint);
 
 		}
+
+		UGameplayStatics::ApplyDamage(
+			BoxHit.GetActor(),
+			Damage,
+			GetInstigator()->GetController(),
+			GetOwner(),
+			UDamageType::StaticClass()
+		);
 	}
 }
 
@@ -81,12 +90,12 @@ void ABSWeapon::BoxTrace(FHitResult& BoxHit)
 		this,
 		Start,
 		End,
-		FVector(15.f, 15.f, 15.f),
+		FVector(30.f, 30.f, 30.f),
 		BoxTraceStart->GetComponentRotation(),
 		ETraceTypeQuery::TraceTypeQuery1,
 		false,
 		ActorsToIgnore,
-		EDrawDebugTrace::ForDuration,
+		EDrawDebugTrace::None,
 		BoxHit,
 		true
 	);
