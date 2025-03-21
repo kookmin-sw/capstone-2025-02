@@ -59,6 +59,7 @@ void ABSCharacter::BeginPlay()
 			PlayerWeapon = World->SpawnActor<ABSWeapon>(PlayerWeaponClass);
 			PlayerWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName("WeaponSocket"));
 			PlayerWeapon->SetOwner(this);
+			PlayerWeapon->SetInstigator(this);
 		}
 	}
 }

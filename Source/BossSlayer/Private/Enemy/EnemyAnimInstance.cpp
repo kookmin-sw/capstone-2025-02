@@ -22,14 +22,18 @@ void UEnemyAnimInstance::NativeInitializeAnimation()
 
 void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
-	Super::NativeUpdateAnimation(DeltaTime);
+    Super::NativeUpdateAnimation(DeltaTime);
 
-	if (EnemyMovement)
-	{
-		GroundSpeed = UKismetMathLibrary::VSizeXY(EnemyMovement->Velocity);
+    if (EnemyMovement)
+    {
 
-		Direction = CalculateDirection(EnemyMovement->Velocity, EnemyCharacter->GetActorRotation());
-	}
+        GroundSpeed = UKismetMathLibrary::VSizeXY(EnemyMovement->Velocity);
 
+        IsAccelerating = GroundSpeed - PreviousGroundSpeed > 0.1f;
 
+        PreviousGroundSpeed = GroundSpeed;
+
+        Direction = CalculateDirection(EnemyMovement->Velocity, EnemyCharacter->GetActorRotation());
+    }
 }
+
