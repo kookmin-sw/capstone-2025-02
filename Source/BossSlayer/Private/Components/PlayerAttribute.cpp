@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/BSOverlay.h"
 #include "UI/BSHUD.h"
+#include "Components/PlayerAttribute.h"
 
 // Sets default values for this component's properties
 UPlayerAttribute::UPlayerAttribute()
@@ -22,6 +23,9 @@ UPlayerAttribute::UPlayerAttribute()
 	StaminaRecoverRate = 20.f;
 
 	// ...
+
+	HealCount = 4;
+	HealAmount = 60.f;
 }
 
 
@@ -37,6 +41,9 @@ void UPlayerAttribute::BeginPlay()
 			BSOverlay = BSHUD->GetBSOverlay();
 		}
 	}
+
+	BSOverlay->SetHealthBarPercent(CurrentHealth / MaxHealth);
+	BSOverlay->SetHealCountText(HealCount);
 }
 
 
@@ -58,9 +65,9 @@ void UPlayerAttribute::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	}
 }
 
-void UPlayerAttribute::ReceiveDamage(float Damage)
+void UPlayerAttribute::ChangeHealth(float Amount)
 {
-	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0.f, 100.f);
+	CurrentHealth = FMath::Clamp(CurrentHealth + Amount, 0.f, 100.f);
 
 	if (BSOverlay)
 		BSOverlay->SetHealthBarPercent(CurrentHealth / MaxHealth);
@@ -71,5 +78,12 @@ void UPlayerAttribute::UseStamina(float Amount)
 	CurrentStamina -= Amount;
 	if (BSOverlay)
 		BSOverlay->SetStaminaBarPercent(CurrentStamina / MaxStamina);
+}
+
+void UPlayerAttribute::UseHealItem()
+{
+	HealCount--;
+	if (BSOverlay)
+		BSOverlay->SetHealCountText(HealCount);
 }
 

@@ -44,7 +44,9 @@ protected:
 	void Attack();
 	UFUNCTION(BlueprintNativeEvent)
 	void Sprint(const FInputActionValue& Value);
-
+	UFUNCTION(BlueprintNativeEvent)
+	void Heal();
+	
 	/* Play Animation Montage */
 	void PlayRollMontage();
 	void PlayComboAttackMontage();
@@ -57,6 +59,8 @@ protected:
 	void RollEnd();
 	UFUNCTION(BlueprintCallable)
 	void AttackEnd();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void HealEnd();
 
 	/* Input Buffering */
 	// bStoreState : 현재 CharacterState도 같이 저장할 것인지 (구르기->공격 등에 사용)
@@ -84,6 +88,8 @@ protected:
 	UInputAction* AttackAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UInputAction* SprintAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UInputAction* HealAction;
 
 private:	
 	/* Camera */
@@ -101,6 +107,8 @@ private:
 	UAnimMontage* RollAttackMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* HitReactMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* HealMontage;
 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TArray<FName> AttackMontageSections;
@@ -142,4 +150,8 @@ private:
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool bIsInvincible;
+
+	/* Heal */
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool bCouldHeal;
 };
