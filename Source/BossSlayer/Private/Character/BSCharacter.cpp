@@ -122,6 +122,7 @@ void ABSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		EnhancedInputComponent->BindAction(LockOnAction, ETriggerEvent::Triggered, this, &ABSCharacter::LockOn);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ABSCharacter::Attack);
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ABSCharacter::Sprint);
+		EnhancedInputComponent->BindAction(HealAction, ETriggerEvent::Triggered, this, &ABSCharacter::Heal);
 	}
 }
 
@@ -194,10 +195,10 @@ void ABSCharacter::Roll()
 
 	if (Attribute)
 	{
-		if (Attribute->GetCurrentStamina() < 20.f)
+		if (Attribute->GetCurrentStamina() < 10.f)
 			return;
 
-		Attribute->UseStamina(20.f);
+		Attribute->UseStamina(10.f);
 	}
 
 	CharacterState = ECharacterState::ECS_Rolling;
@@ -302,6 +303,38 @@ void ABSCharacter::Attack()
 		else
 			PlayComboAttackMontage();
 	}
+}
+
+void ABSCharacter::Heal_Implementation()
+{
+	if (CharacterState != ECharacterState::ECS_Neutral)
+	{
+		StoreInputToBuffer(HealAction);
+		bCouldHeal = false;
+		return;
+	}
+
+	if (Attribute->GetHealCount() <= 0)
+	{
+		bCouldHeal = false;
+		return;
+	}
+
+	CharacterState = ECharacterState::ECS_Healing;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HealMontage)
+	{
+		AnimInstance->Montage_Play(HealMontage);
+	}
+	bCouldHeal = true;
+}
+
+void ABSCharacter::HealEnd_Implementation()
+{
+	Attribute->UseHealItem();
+
+	CharacterState = ECharacterState::ECS_Neutral;
 }
 
 void ABSCharacter::AttackEnd()

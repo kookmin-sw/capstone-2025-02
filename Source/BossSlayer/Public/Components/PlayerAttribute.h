@@ -19,12 +19,14 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void ReceiveDamage(float Damage);
+	void ChangeHealth(float Amount);
 	void UseStamina(float Amount);
+	void UseHealItem();
 
 	FORCEINLINE void SetRecoverStamina(bool Flag) { bRecoverStamina = Flag; };
 	FORCEINLINE float GetCurrentHealth() { return CurrentHealth; }
 	FORCEINLINE float GetCurrentStamina() { return CurrentStamina; }
+	FORCEINLINE float GetHealCount() { return HealCount; }
 	FORCEINLINE bool IsDead() { return CurrentHealth == 0; }
 
 protected:
@@ -32,6 +34,17 @@ protected:
 	virtual void BeginPlay() override;
 
 private:	
+	UPROPERTY()
+	class UBSOverlay* BSOverlay;
+
+	/* Health */
+	UPROPERTY(EditDefaultsOnly)
+	float CurrentHealth;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MaxHealth;
+
+	/* Stamina */
 	UPROPERTY(EditDefaultsOnly)
 	float CurrentStamina;
 
@@ -41,13 +54,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	float StaminaRecoverRate;
 
-	UPROPERTY(EditDefaultsOnly)
-	float CurrentHealth;
-
-	UPROPERTY(EditDefaultsOnly)
-	float MaxHealth;
-
 	bool bRecoverStamina;
 
-	class UBSOverlay* BSOverlay;
+	/* Heal */
+	UPROPERTY(EditDefaultsOnly)
+	int HealCount;
+
+	UPROPERTY(EditDefaultsOnly)
+	float HealAmount;
 };

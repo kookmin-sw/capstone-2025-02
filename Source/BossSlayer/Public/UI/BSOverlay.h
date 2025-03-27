@@ -7,6 +7,7 @@
 #include "BSOverlay.generated.h"
 
 class UProgressBar;
+class UTextBlock;
 
 /**
  * 
@@ -19,6 +20,7 @@ class UBSOverlay : public UUserWidget
 public:
 	void SetHealthBarPercent(float Percent);
 	void SetStaminaBarPercent(float Percent);
+	void SetHealCountText(int Count);
 
 protected:
 
@@ -28,4 +30,7 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	UProgressBar* StaminaBar;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* HealCountText;
 };
