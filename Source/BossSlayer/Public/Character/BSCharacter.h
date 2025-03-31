@@ -93,8 +93,12 @@ protected:
 
 private:	
 	/* Camera */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UGameplayCameraComponent* GameplayCamera;
+
+	// 실제 Kwang의 메시 (GetMesh()는 애니메이션 재생을 위해서만 사용)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class USkeletalMeshComponent* CharacterMesh;
 
 	/*Animation Montage*/
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
