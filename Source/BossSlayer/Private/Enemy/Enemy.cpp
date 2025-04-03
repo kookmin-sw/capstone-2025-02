@@ -14,6 +14,8 @@
 #include "Components/AttributeComponent.h"
 #include "Components/WidgetComponent.h"
 #include "UI/BSHealthBarComponent.h"
+#include "MotionWarpingComponent.h"
+
 #include "Utils/Debug.h"
 
 AEnemy::AEnemy()
@@ -22,10 +24,10 @@ AEnemy::AEnemy()
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
-	bUseControllerRotationYaw = false;
+	bUseControllerRotationYaw = true;
 
-	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->MaxWalkSpeed = 650.f;
 
 
 	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
@@ -35,8 +37,11 @@ AEnemy::AEnemy()
 	GetMesh()->SetGenerateOverlapEvents(true);
 
 	AttributeComponent = CreateDefaultSubobject<UAttributeComponent>(TEXT("AttributesComponent"));
+
 	HealthBarComponent = CreateDefaultSubobject<UBSHealthBarComponent>(TEXT("HealthBarWidget"));
 	HealthBarComponent->SetupAttachment(GetRootComponent());
+
+	MotionWarpingComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarpingComponent"));
 
 
 }

@@ -12,6 +12,7 @@ class UBoxComponent;
 class ABSWeapon;
 class UAttributeComponent;
 class UBSHealthBarComponent;
+class UMotionWarpingComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnded);
 
@@ -43,23 +44,14 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 	//~ End APawn Interface
 
-	UFUNCTION(BlueprintCallable)
-	void SpawnAndEquipWeapon(const FName SocketName);
 
-	UFUNCTION(BlueprintCallable)
-	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "Motion Warping")
+	UMotionWarpingComponent* MotionWarpingComponent;
 
-	UFUNCTION(BlueprintCallable)
-	void Attack();
-
-	void PlayHitReactMontage(const FName& SectionName);
-	void PlayAttackMontage(const FName& SectionName);
-
-private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "Attribute")
 	UAttributeComponent* AttributeComponent;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = "Health Bar")
 	UBSHealthBarComponent* HealthBarComponent;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
@@ -73,6 +65,23 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Montages")
 	UAnimMontage* HitReactMontage;
+
+
+
+	UFUNCTION(BlueprintCallable)
+	void SpawnAndEquipWeapon(const FName SocketName);
+
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
+
+	UFUNCTION(BlueprintCallable)
+	void Attack();
+
+	void PlayHitReactMontage(const FName& SectionName);
+	void PlayAttackMontage(const FName& SectionName);
+
+private:
+
 
 
 };
