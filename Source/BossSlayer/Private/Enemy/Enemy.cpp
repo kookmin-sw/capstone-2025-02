@@ -41,6 +41,11 @@ AEnemy::AEnemy()
 
 }
 
+void AEnemy::BroadcastAttackEnded()
+{
+	OnAttackEnded.Broadcast();
+}
+
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();

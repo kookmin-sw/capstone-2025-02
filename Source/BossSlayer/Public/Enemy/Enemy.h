@@ -13,6 +13,8 @@ class ABSWeapon;
 class UAttributeComponent;
 class UBSHealthBarComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttackEnded);
+
 UCLASS()
 class BOSSSLAYER_API AEnemy : public ACharacter, public IHitInterface
 {
@@ -27,6 +29,12 @@ public:
 	//~ Begin AActor Interface.
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	//~ End AActor Interface
+
+	UPROPERTY(BlueprintAssignable, Category = "Attack")
+	FOnAttackEnded OnAttackEnded;
+
+	UFUNCTION(BlueprintCallable)
+	void BroadcastAttackEnded();
 
 protected:
 	virtual void BeginPlay() override;

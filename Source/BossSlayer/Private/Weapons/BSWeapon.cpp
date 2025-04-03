@@ -52,12 +52,15 @@ void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedCompon
 
 	if (BoxHit.GetActor())
 	{
-		if (IHitInterface* HitInterface = Cast<IHitInterface>(OtherActor))
+		if (IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor()))
 		{
+			
 			if (GEngine)
 			{
 				GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, TEXT("Success Hit"));
 			}
+			UE_LOG(LogTemp, Warning, TEXT("BoxHit Actor: %s"), *BoxHit.GetActor()->GetName());
+
 			HitInterface->Execute_GetHit(BoxHit.GetActor(), GetOwner(), BoxHit.ImpactPoint);
 
 		}
@@ -65,7 +68,7 @@ void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedCompon
 		UGameplayStatics::ApplyDamage(
 			BoxHit.GetActor(),
 			Damage,
-			GetInstigator()->GetController(),
+			GetInstigator()->GetController(),	
 			GetOwner(),
 			UDamageType::StaticClass()
 		);
