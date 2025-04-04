@@ -20,7 +20,7 @@ UPlayerAttribute::UPlayerAttribute()
 	MaxHealth = 100.f;
 	CurrentStamina = 100.f;
 	MaxStamina = 100.f;
-	StaminaRecoverRate = 20.f;
+	StaminaRecoverRate = 35.f;
 
 	// ...
 

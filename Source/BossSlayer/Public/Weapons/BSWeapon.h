@@ -37,7 +37,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	UStaticMeshComponent* WeaponMesh;
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Properties", meta = (AllowPrivateAccess="true"))
 	UBoxComponent* WeaponCollisionBox;
 
 	UPROPERTY(VisibleAnywhere)

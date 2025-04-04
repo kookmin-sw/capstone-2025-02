@@ -22,14 +22,17 @@ ABSCharacter::ABSCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	CharacterMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh"));
+	CharacterMesh->SetupAttachment(GetMesh());
+
 	GameplayCamera = CreateDefaultSubobject<UGameplayCameraComponent>(TEXT("Camera"));
 	GameplayCamera->SetupAttachment(GetMesh());
 
-	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
-	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
-	GetMesh()->SetGenerateOverlapEvents(true);
+	CharacterMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	CharacterMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	CharacterMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	CharacterMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
+	CharacterMesh->SetGenerateOverlapEvents(true);
 
 	Attribute = CreateDefaultSubobject<UPlayerAttribute>(TEXT("Attributes"));
 
@@ -57,7 +60,7 @@ void ABSCharacter::BeginPlay()
 		if (PlayerWeaponClass)
 		{
 			PlayerWeapon = World->SpawnActor<ABSWeapon>(PlayerWeaponClass);
-			PlayerWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName("WeaponSocket"));
+			PlayerWeapon->AttachToComponent(CharacterMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("WeaponSocket"));
 			PlayerWeapon->SetOwner(this);
 			PlayerWeapon->SetInstigator(this);
 		}
@@ -282,11 +285,16 @@ void ABSCharacter::Attack()
 
 	CharacterState = ECharacterState::ECS_Attacking;
 
-	if (bLockingOn)
+	if (AController* MyController = GetController())
 	{
-		if (AController* MyController = GetController())
+		if (bLockingOn)
 		{
 			FRotator NewRot = FRotator(0.f, MyController->GetControlRotation().Yaw, 0.f);
+			SetActorRotation(NewRot);
+		}
+		else
+		{
+			FRotator NewRot = FRotator(0.f, GetLastMovementInputVector().Rotation().Yaw, 0.f);
 			SetActorRotation(NewRot);
 		}
 	}
