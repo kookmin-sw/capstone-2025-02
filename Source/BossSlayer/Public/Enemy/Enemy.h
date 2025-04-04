@@ -66,6 +66,12 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Montages")
 	UAnimMontage* HitReactMontage;
 
+	UPROPERTY(EditAnywhere, Category = "Montages")
+	UAnimMontage* DeathMontage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "State")
+	bool bIsDead = false;
+
 
 
 	UFUNCTION(BlueprintCallable)
@@ -76,6 +82,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void Attack();
+
+	void Die();
+	
 
 	void PlayHitReactMontage(const FName& SectionName);
 	void PlayAttackMontage(const FName& SectionName);

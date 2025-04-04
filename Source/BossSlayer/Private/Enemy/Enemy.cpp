@@ -15,6 +15,7 @@
 #include "Components/WidgetComponent.h"
 #include "UI/BSHealthBarComponent.h"
 #include "MotionWarpingComponent.h"
+#include "Controllers/BSAiController.h"
 
 #include "Utils/Debug.h"
 
@@ -94,6 +95,28 @@ void AEnemy::Attack()
 	PlayAttackMontage(FName("Attack1"));
 }
 
+void AEnemy::Die()
+{
+	if (bIsDead) return;
+
+	bIsDead = true;
+
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		if (DeathMontage) 
+		{
+			float Duration = AnimInstance->Montage_Play(DeathMontage);
+			SetLifeSpan(Duration + 0.5f);
+		}
+	}
+
+	if (ABSAiController* AiController = Cast<ABSAiController>(GetController()))
+	{
+		AiController->StopMovement();
+	}
+
+}
+
 void AEnemy::PlayHitReactMontage(const FName& SectionName)
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -146,6 +169,11 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	if (AttributeComponent && HealthBarComponent)
 	{
 		AttributeComponent->ReceiveDamage(DamageAmount);
+
+		if (AttributeComponent->IsDead())
+		{
+			Die();
+		}
 
 		HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
 		
