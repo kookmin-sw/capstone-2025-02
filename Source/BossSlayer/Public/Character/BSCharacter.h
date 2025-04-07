@@ -128,9 +128,7 @@ private:
 	AActor* LockOnTarget;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bLockingOn;
-	float LockOnPitchMin;
-	float LockOnPitchMax;
-	float LockOnPitchFalloff;
+	float LockOnPitch;
 
 	/* Input Buffer */
 	UPROPERTY()
