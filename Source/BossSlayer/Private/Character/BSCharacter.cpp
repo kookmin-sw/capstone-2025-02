@@ -300,8 +300,11 @@ void ABSCharacter::Attack()
 		}
 		else
 		{
-			FRotator NewRot = FRotator(0.f, GetLastMovementInputVector().Rotation().Yaw, 0.f);
-			SetActorRotation(NewRot);
+			if (GetLastMovementInputVector() != FVector::Zero())
+			{
+				FRotator NewRot = FRotator(0.f, GetLastMovementInputVector().Rotation().Yaw, 0.f);
+				SetActorRotation(NewRot);
+			}
 		}
 	}
 
