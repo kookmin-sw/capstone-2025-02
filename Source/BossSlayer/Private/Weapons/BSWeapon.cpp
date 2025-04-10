@@ -63,6 +63,18 @@ void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedCompon
 
 			HitInterface->Execute_GetHit(BoxHit.GetActor(), GetOwner(), BoxHit.ImpactPoint);
 
+			if (HitParticle)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Hit Particle: %s"), *HitParticle->GetName());
+
+				UGameplayStatics::SpawnEmitterAtLocation(
+					GetWorld(),
+					HitParticle,
+					BoxHit.GetActor()->GetActorLocation(),
+					FRotator::ZeroRotator,
+					true
+				);
+			}
 		}
 
 		UGameplayStatics::ApplyDamage(

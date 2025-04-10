@@ -16,6 +16,7 @@
 #include "UI/BSHealthBarComponent.h"
 #include "MotionWarpingComponent.h"
 #include "Controllers/BSAiController.h"
+#include "Particles/ParticleSystem.h"
 
 #include "Utils/Debug.h"
 
@@ -85,6 +86,14 @@ void AEnemy::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
 	{
 		Weapon->GetWeaponCollisionBox()->SetCollisionEnabled(CollisionEnabled);
 		Weapon->IgnoreActors.Empty();
+	}
+}
+
+void AEnemy::SetHitParticle(UParticleSystem* Particle)
+{
+	if (Weapon)
+	{
+		Weapon->SetHitParticle(Particle);
 	}
 }
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Particles/ParticleSystem.h"
 #include "BSWeapon.generated.h"
 
 class UBoxComponent;
@@ -34,6 +35,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
 	float Damage = 15.f;
 
+	UPROPERTY(EditAnywhere, Category = "Weapon Properties")
+	UParticleSystem* HitParticle;
+
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
 	UStaticMeshComponent* WeaponMesh;
 
@@ -49,4 +53,6 @@ private:
 
 public:
 	FORCEINLINE UBoxComponent* GetWeaponCollisionBox() const { return WeaponCollisionBox; }
+
+	FORCEINLINE void SetHitParticle(UParticleSystem* Particle) { HitParticle = Particle; }
 };
