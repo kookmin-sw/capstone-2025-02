@@ -153,6 +153,12 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AEnemy::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 {
+	if (!InAttacker)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetHit: InAttacker is null!"));
+		return;
+	}
+
 	FName SectionName = UGameFunctionLibrary::ComputeHitReactDirection(InAttacker, this);
 
 	if (GEngine)

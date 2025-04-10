@@ -98,7 +98,7 @@ void ABSWeapon::BoxTrace(FHitResult& BoxHit)
 		ETraceTypeQuery::TraceTypeQuery1,
 		false,
 		ActorsToIgnore,
-		EDrawDebugTrace::None,
+		EDrawDebugTrace::ForDuration,
 		BoxHit,
 		true
 	);
