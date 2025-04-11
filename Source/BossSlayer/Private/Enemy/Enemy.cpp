@@ -16,6 +16,8 @@
 #include "UI/BSHealthBarComponent.h"
 #include "MotionWarpingComponent.h"
 #include "Controllers/BSAiController.h"
+#include "Components/CapsuleComponent.h"
+
 
 #include "Utils/Debug.h"
 
@@ -29,7 +31,6 @@ AEnemy::AEnemy()
 
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->MaxWalkSpeed = 650.f;
-
 
 	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
