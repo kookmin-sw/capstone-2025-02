@@ -35,6 +35,10 @@ ABSCharacter::ABSCharacter()
 	CharacterMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
 	CharacterMesh->SetGenerateOverlapEvents(true);
 
+	PotionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PotionMesh"));
+	PotionMesh->SetupAttachment(CharacterMesh);
+	PotionMesh->AttachToComponent(CharacterMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("PotionSocket"));
+
 	Attribute = CreateDefaultSubobject<UPlayerAttribute>(TEXT("Attributes"));
 
 	LockOnPitch = -15.f;
@@ -74,6 +78,11 @@ void ABSCharacter::BeginPlay()
 				bLockingOn = true;
 				break;
 			}
+		}
+
+		if (PotionMesh)
+		{
+			PotionMesh->SetVisibility(false);
 		}
 	}
 }
@@ -346,6 +355,7 @@ void ABSCharacter::Heal_Implementation()
 	if (AnimInstance && HealMontage)
 	{
 		AnimInstance->Montage_Play(HealMontage);
+		PotionMesh->SetVisibility(true);
 	}
 	bCouldHeal = true;
 }
@@ -353,6 +363,7 @@ void ABSCharacter::Heal_Implementation()
 void ABSCharacter::HealEnd_Implementation()
 {
 	Attribute->UseHealItem();
+	PotionMesh->SetVisibility(false);
 
 	CharacterState = ECharacterState::ECS_Neutral;
 }
