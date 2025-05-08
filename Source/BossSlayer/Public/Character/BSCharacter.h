@@ -12,6 +12,7 @@ class UInputAction;
 struct FInputActionValue;
 class ABSWeapon;
 class UPlayerAttribute;
+class UStaticMeshComponent;
 
 UCLASS()
 class BOSSSLAYER_API ABSCharacter : public ACharacter, public IHitInterface
@@ -156,4 +157,7 @@ private:
 	/* Heal */
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bCouldHeal;
+
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* PotionMesh;
 };

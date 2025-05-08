@@ -16,7 +16,8 @@
 #include "UI/BSHealthBarComponent.h"
 #include "MotionWarpingComponent.h"
 #include "Controllers/BSAiController.h"
-#include "Particles/ParticleSystem.h"
+#include "Components/CapsuleComponent.h"
+
 
 #include "Utils/Debug.h"
 
@@ -30,7 +31,6 @@ AEnemy::AEnemy()
 
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->MaxWalkSpeed = 650.f;
-
 
 	GetMesh()->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
@@ -86,14 +86,6 @@ void AEnemy::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
 	{
 		Weapon->GetWeaponCollisionBox()->SetCollisionEnabled(CollisionEnabled);
 		Weapon->IgnoreActors.Empty();
-	}
-}
-
-void AEnemy::SetHitParticle(UParticleSystem* Particle)
-{
-	if (Weapon)
-	{
-		Weapon->SetHitParticle(Particle);
 	}
 }
 
@@ -162,6 +154,12 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AEnemy::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 {
+	if (!InAttacker)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetHit: InAttacker is null!"));
+		return;
+	}
+
 	FName SectionName = UGameFunctionLibrary::ComputeHitReactDirection(InAttacker, this);
 
 	if (GEngine)
