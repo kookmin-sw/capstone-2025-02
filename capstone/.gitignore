@@ -1,0 +1,10 @@
+/Saved
+/Intermediate
+/.vs
+/Build
+/Plugins
+*.sln
+*_BuiltData.uasset
+/DerivedDataCache
+/Binaries
+Content/Levels/DefaultLevel.umap
