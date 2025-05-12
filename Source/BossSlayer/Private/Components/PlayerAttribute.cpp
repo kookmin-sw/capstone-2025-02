@@ -87,3 +87,8 @@ void UPlayerAttribute::UseHealItem()
 		BSOverlay->SetHealCountText(HealCount);
 }
 
+void UPlayerAttribute::ReceiveDamage(float Damage)
+{
+	CurrentHealth = FMath::Clamp(CurrentHealth - Damage, 0, MaxHealth);
+}
+

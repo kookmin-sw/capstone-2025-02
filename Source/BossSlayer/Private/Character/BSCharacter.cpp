@@ -15,6 +15,8 @@
 #include "Components/BoxComponent.h"
 #include "Components/PlayerAttribute.h"
 #include "DrawDebugHelpers.h"
+#include "UI/BSHUD.h"
+#include "UI/BSOverlay.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -204,6 +206,34 @@ void ABSCharacter::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoin
 		GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &ABSCharacter::DisableStun);
 		PlayMontageBySection(HitReactMontage, SectionName);
 	}
+}
+
+float ABSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if (Attribute)
+	{
+		if (APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			if (ABSHUD* Hud = Cast<ABSHUD>(PC->GetHUD()))
+			{
+				if (UBSOverlay* Overlay = Hud->GetBSOverlay())
+				{
+					
+					Attribute->ReceiveDamage(DamageAmount);
+					
+					
+					Overlay->SetHealthBarPercent(Attribute->GetHealthPercent());
+
+					if (Attribute->IsDead())
+					{
+						// TODO : Dead();
+					}
+				}
+			}
+		}
+
+	}
+	return 0.0f;
 }
 
 void ABSCharacter::Roll()
