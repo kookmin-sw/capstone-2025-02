@@ -38,6 +38,7 @@ ABSCharacter::ABSCharacter()
 	PotionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PotionMesh"));
 	PotionMesh->SetupAttachment(CharacterMesh);
 	PotionMesh->AttachToComponent(CharacterMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("PotionSocket"));
+	PotionMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	Attribute = CreateDefaultSubobject<UPlayerAttribute>(TEXT("Attributes"));
 
