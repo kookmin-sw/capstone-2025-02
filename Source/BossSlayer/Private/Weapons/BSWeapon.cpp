@@ -63,16 +63,25 @@ void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedCompon
 
 			HitInterface->Execute_GetHit(BoxHit.GetActor(), GetOwner(), BoxHit.ImpactPoint);
 
+			
+
+			OnSuccessfulHit(BoxHit.GetActor(), BoxHit);
+
 		}
 
 		UGameplayStatics::ApplyDamage(
 			BoxHit.GetActor(),
 			Damage,
-			GetInstigator()->GetController(),	
+			GetInstigator()->GetController(),
 			GetOwner(),
 			UDamageType::StaticClass()
 		);
 	}
+}
+
+void ABSWeapon::OnSuccessfulHit(AActor* HitActor, const FHitResult& Hit)
+{
+
 }
 
 void ABSWeapon::BoxTrace(FHitResult& BoxHit)
