@@ -22,11 +22,13 @@ public:
 	void ChangeHealth(float Amount);
 	void UseStamina(float Amount);
 	void UseHealItem();
+	void ReceiveDamage(float Damage);
 
 	FORCEINLINE void SetRecoverStamina(bool Flag) { bRecoverStamina = Flag; };
 	FORCEINLINE float GetCurrentHealth() { return CurrentHealth; }
 	FORCEINLINE float GetCurrentStamina() { return CurrentStamina; }
 	FORCEINLINE float GetHealCount() { return HealCount; }
+	FORCEINLINE float GetHealthPercent() { return CurrentHealth / MaxHealth; }
 	FORCEINLINE bool IsDead() { return CurrentHealth == 0; }
 
 protected:

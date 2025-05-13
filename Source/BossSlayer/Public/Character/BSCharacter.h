@@ -33,6 +33,10 @@ public:
 	virtual void GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint) override;
 	//~ End IHitInterface Interface.
 
+	//~ Begin AActor Interface.
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	//~ End AActor Interface
+
 	FORCEINLINE bool GetIsInvincible() { return bIsInvincible; }
 
 protected:

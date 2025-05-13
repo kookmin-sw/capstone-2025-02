@@ -27,7 +27,7 @@ protected:
 
 	UFUNCTION()
 	virtual void OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+	virtual void OnSuccessfulHit(AActor* HitActor, const FHitResult& Hit);
 
 private:
 	void BoxTrace(FHitResult& BoxHit);
