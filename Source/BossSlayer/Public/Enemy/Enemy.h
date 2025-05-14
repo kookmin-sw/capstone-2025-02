@@ -77,8 +77,6 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SpawnAndEquipWeapon(const FName SocketName);
 
-	UFUNCTION(BlueprintCallable)
-	void SetHitParticle(UParticleSystem* Particle);
 
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);

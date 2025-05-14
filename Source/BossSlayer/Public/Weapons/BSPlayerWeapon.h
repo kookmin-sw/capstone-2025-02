@@ -19,6 +19,6 @@ public:
 	ABSPlayerWeapon();
 
 protected:
-	void OnSuccessfulHit(AActor* HitActor, const FHitResult& Hit) override;
+	virtual void OnSuccessfulHit(AActor* HitActor, const FHitResult& Hit) override;
 
 };
