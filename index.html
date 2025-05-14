@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Boss Slayer - Capstone Design 2025-02</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem;
+      line-height: 1.7;
+    }
+    h1, h2, h3 {
+      color: #222;
+    }
+    img {
+      display: block;
+      margin: 1rem 0;
+      max-width: 100%;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 1rem 0;
+      width: 100%;
+      text-align: center;
+    }
+    table th, table td {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+    }
+    hr {
+      margin: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Boss Slayer</h1>
+  <h3>Capstone Design 2025-02</h3>
+
+  <img src="./docs/img/poster.jpg" width="800" alt="포스터"/>
+
+  <hr>
+
+  <h2>✨ 프로젝트 개요</h2>
+  <p><strong>Boss Slayer</strong>는 Unreal Engine 5로 개발된 소울라이크 액션 어드벤처 게임입니다.</p>
+  <p>정밀한 조작과 반복 도전을 통해 보스를 공략하는 고난이도 전투를 중심으로 구성되어 있으며,
+     회피, 포션, 스태미나 등 제한된 자원을 전략적으로 사용해 패턴을 익히고 극복하는 과정을 통해 깊은 몰입감을 제공합니다.</p>
+
+  <hr>
+
+  <h2>🚀 기술적 강점</h2>
+
+  <h3>▶️ 모션 매칭</h3>
+  <ul>
+    <li>다양한 애니메이션 클립을 포즈 단위로 DB화한 후, 입력 및 캐릭터 상태를 기반으로 목표 포즈를 예측해 실시간 전환</li>
+    <li>회피 후 공격 등 빠른 동작 간 연결에서 자연스러운 애니메이션 흐름 구현</li>
+  </ul>
+  <img src="./docs/img/motion_matching1.gif" width="600" />
+  <img src="./docs/img/motion_matching2.gif" width="600" />
+
+  <h3>▶️ 인풋 버퍼링</h3>
+  <ul>
+    <li>행동 중 들어온 입력을 버퍼에 저장하고, 해당 행동이 끝난 후 이를 수행</li>
+    <li>빠른 반응성과 조작감을 제공</li>
+  </ul>
+  <img src="./docs/img/input_buffering.gif" width="600" />
+
+  <h3>▶️ 비헤이비어 트리</h3>
+  <ul>
+    <li>언리얼의 Behavior Tree로 보스의 공격, 이동, 회피를 조건 기반으로 제어</li>
+    <li>트리 구조로 전략적 행동 및 시각적 관리 가능</li>
+  </ul>
+  <img src="./docs/img/behaviour_tree.gif" width="600" />
+
+  <h3>▶️ 보스 스킬 & 공격 패턴</h3>
+  <p>보스는 다양한 전투 기술을 상황에 맞춰 전략적으로 구사하며, 비헤이비어 트리 로직과 연동되어 사용됩니다.</p>
+  <img src="./docs/img/soulsiphon.gif" width="600" />
+  <img src="./docs/img/subjugate.gif" width="600" />
+
+  <h3>▶️ EQS 시스템</h3>
+  <ul>
+    <li>Environment Query System으로 거리, 장애물 등을 평가하여 최적 공격 위치 탐색</li>
+  </ul>
+
+  <h3>▶️ 애니메이션 State Machine</h3>
+  <ul>
+    <li>보스의 이동/공격/회피 애니메이션 상태 전환 자연스럽게 연결</li>
+    <li>Aim Offset으로 항상 플레이어를 바라보게 구성</li>
+  </ul>
+  <img src="./docs/img/attack_state.gif" width="600" />
+
+  <hr>
+
+  <h2>👥 팀원 소개</h2>
+  <ul>
+    <li><a href="https://github.com/706-Camille" target="_blank">
+      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="20" /> 이승민</a> (팀장)</li>
+    <li><a href="https://github.com/sys010611" target="_blank">
+      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="20" /> 신윤섭</a></li>
+    <li><a href="https://github.com/seonjae01" target="_blank">
+      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="20" /> 이선재</a></li>
+  </ul>
+
+  <hr>
+
+  <h2>🛠️ 기술 스택</h2>
+
+  <table>
+    <tr>
+      <th>Unreal Engine 5</th>
+      <th>C++</th>
+      <th>GitHub</th>
+      <th>Trello</th>
+      <th>Visual Studio</th>
+    </tr>
+    <tr>
+      <td><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/unrealengine/unrealengine-original.svg" width="60"/></td>
+      <td><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" width="60"/></td>
+      <td><img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="40"/></td>
+      <td><img src="https://cdn-icons-png.flaticon.com/512/5968/5968705.png" width="50"/></td>
+      <td><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/visualstudio/visualstudio-plain.svg" width="60"/></td>
+    </tr>
+  </table>
+
+  <hr>
+
+  <h2>📦 설치 및 실행 방법</h2>
+
+  <h3>1. 필수 환경</h3>
+  <ul>
+    <li>Unreal Engine 5.3 이상</li>
+    <li>Visual Studio 2022 (C++ 개발 도구 포함)</li>
+  </ul>
+
+  <h3>2. 프로젝트 클론 및 열기</h3>
+  <pre><code>git clone https://github.com/kookmin-sw/capstone-2025-02.git
+cd capstone-2025-02</code></pre>
+
+  <h3>3. 프로젝트 빌드</h3>
+  <p>Visual Studio에서 `.sln` 파일을 열고 `Development Editor + Win64`로 빌드 진행</p>
+
+</body>
+</html>
