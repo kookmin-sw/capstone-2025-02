@@ -85,6 +85,13 @@ protected:
 	UFUNCTION()
 	FORCEINLINE void SetIsInvincible(bool Flag) { bIsInvincible = Flag; }
 
+	/* HUD */
+	UFUNCTION()
+	void UpdateHUD();
+
+	UFUNCTION()
+	void ApplyHealing(float HealAmount);
+
 	/* Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UInputAction* RollAction;

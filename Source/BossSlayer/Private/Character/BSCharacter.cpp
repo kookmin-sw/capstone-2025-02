@@ -218,27 +218,16 @@ float ABSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 {
 	if (Attribute)
 	{
-		if (APlayerController* PC = Cast<APlayerController>(GetController()))
-		{
-			if (ABSHUD* Hud = Cast<ABSHUD>(PC->GetHUD()))
-			{
-				if (UBSOverlay* Overlay = Hud->GetBSOverlay())
-				{
-					
-					Attribute->ReceiveDamage(DamageAmount);
-					
-					
-					Overlay->SetHealthBarPercent(Attribute->GetHealthPercent());
-
-					if (Attribute->IsDead())
-					{
-						// TODO : Dead();
-					}
-				}
-			}
-		}
-
+		Attribute->ReceiveDamage(DamageAmount);
 	}
+
+	UpdateHUD();
+
+	if (Attribute->IsDead())
+	{
+		// TODO : Dead();
+	}
+	
 	return 0.0f;
 }
 
@@ -398,7 +387,11 @@ void ABSCharacter::Heal_Implementation()
 
 void ABSCharacter::HealEnd_Implementation()
 {
+	float HealAmount = 30.f;
+	ApplyHealing(HealAmount);
+
 	Attribute->UseHealItem();
+
 	PotionMesh->SetVisibility(false);
 
 	CharacterState = ECharacterState::ECS_Neutral;
@@ -524,6 +517,28 @@ void ABSCharacter::DisableStun(UAnimMontage* Montage, bool bInterrupted)
 
 	Controller->SetIgnoreMoveInput(false);
 	CharacterState = ECharacterState::ECS_Neutral;
+}
+
+void ABSCharacter::UpdateHUD()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if (ABSHUD* Hud = Cast<ABSHUD>(PC->GetHUD()))
+		{
+			if (UBSOverlay* Overlay = Hud->GetBSOverlay())
+			{
+				Overlay->SetHealthBarPercent(Attribute->GetHealthPercent());
+			}
+		}
+	}
+}
+
+void ABSCharacter::ApplyHealing(float HealAmount)
+{
+	if (!Attribute || HealAmount <= 0.f) return;
+
+	Attribute->ChangeHealth(HealAmount);
+	UpdateHUD();
 }
 
 void ABSCharacter::EnableStun()
