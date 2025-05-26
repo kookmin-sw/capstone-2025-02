@@ -100,7 +100,7 @@ protected:
 
 private:
 	UPROPERTY()
-	UMaterialInstanceDynamic* MeshMaterialInstance;
+	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
 
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool bIsInvincible = false;

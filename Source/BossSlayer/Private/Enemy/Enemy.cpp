@@ -45,9 +45,6 @@ AEnemy::AEnemy()
 
 	MotionWarpingComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarpingComponent"));
 
-	// 0번 슬롯 기준으로 동적 머티리얼 생성
-	MeshMaterialInstance = GetMesh()->CreateAndSetMaterialInstanceDynamic(0);
-
 
 }
 
@@ -59,6 +56,25 @@ void AEnemy::BroadcastAttackEnded()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	if (HealthBarComponent)
+	{
+		HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
+	}
+
+	if (GetMesh())
+	{
+		int32 MaterialCount = GetMesh()->GetNumMaterials();
+		for (int32 i = 0; i < MaterialCount; ++i)
+		{
+			UMaterialInterface* Mat = GetMesh()->GetMaterial(i);
+			if (Mat)
+			{
+				UMaterialInstanceDynamic* DynMat = UMaterialInstanceDynamic::Create(Mat, this);
+				GetMesh()->SetMaterial(i, DynMat);
+				DynamicMaterials.Add(DynMat);
+			}
+		}
+	}
 
 }
 
@@ -167,11 +183,32 @@ void AEnemy::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 {
 	if (!InAttacker)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GetHit: InAttacker is null!"));
+		UE_LOG(LogTemp, Warning, TEXT("GetHit: InAttacker is null"));
 		return;
 	}
 
 	FName SectionName = UGameFunctionLibrary::ComputeHitReactDirection(InAttacker, this);
+
+	for (UMaterialInstanceDynamic* DynMat : DynamicMaterials)
+	{
+		if (DynMat)
+		{
+			DynMat->SetScalarParameterValue("Damage", 0.1f);
+		}
+	}
+
+	// 일정 시간 후 다시 0으로
+	FTimerHandle FlashTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(FlashTimerHandle, [this]()
+		{
+			for (UMaterialInstanceDynamic* DynMat : DynamicMaterials)
+			{
+				if (DynMat)
+				{
+					DynMat->SetScalarParameterValue("Damage", 0.0f);
+				}
+			}
+		}, 0.1f, false);
 
 	if (GEngine)
 	{
@@ -180,6 +217,8 @@ void AEnemy::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 	}
 
 	PlayHitReactMontage(SectionName);
+
+
 }
 
 bool AEnemy::GetbIsInvincible_Implementation() const
