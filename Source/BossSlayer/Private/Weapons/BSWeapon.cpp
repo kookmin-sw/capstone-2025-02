@@ -47,6 +47,9 @@ void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	if (OtherActor == GetOwner())
 		return;
 
+	if (IgnoreActors.Contains(OtherActor))
+		return;
+
 	FHitResult BoxHit;
 	BoxTrace(BoxHit);
 
@@ -105,8 +108,8 @@ void ABSWeapon::BoxTrace(FHitResult& BoxHit)
 	const FVector End = BoxTraceEnd->GetComponentLocation();
 
 	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(this);
-	ActorsToIgnore.Add(GetOwner());
+	ActorsToIgnore.AddUnique(this);
+	ActorsToIgnore.AddUnique(GetOwner());
 
 	for (AActor* Actor : IgnoreActors)
 	{
