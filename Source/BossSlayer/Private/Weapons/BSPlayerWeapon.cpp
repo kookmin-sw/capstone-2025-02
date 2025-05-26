@@ -11,16 +11,36 @@ ABSPlayerWeapon::ABSPlayerWeapon()
 
 void ABSPlayerWeapon::OnSuccessfulHit(AActor* HitActor, const FHitResult& Hit)
 {
-	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.1f);
+	const float TimeDilationValue = 0.0001f; 
+	const float HitStopDuration = 0.15f;  
+
+	AActor* OwnerActor = GetOwner();
+
+	if (OwnerActor)
+	{
+		OwnerActor->CustomTimeDilation = TimeDilationValue;
+	}
+
+	if (HitActor)
+	{
+		HitActor->CustomTimeDilation = TimeDilationValue;
+	}
 
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [=, this]()
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [=]()
 		{
-			UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.0f);
-		}, 0.02f, false);
+			if (OwnerActor)
+			{
+				OwnerActor->CustomTimeDilation = 1.0f;
+			}
+			if (HitActor)
+			{
+				HitActor->CustomTimeDilation = 1.0f;
+			}
+		}, HitStopDuration, false);
 
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Hit Stop Triggered"));
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Hit Stop!"));
 	}
 }
