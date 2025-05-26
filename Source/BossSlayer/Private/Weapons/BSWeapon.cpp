@@ -69,6 +69,17 @@ void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedCompon
 
 			HitInterface->Execute_GetHit(BoxHit.GetActor(), GetOwner(), BoxHit.ImpactPoint);
 
+
+			if (HitParticle)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(
+					GetWorld(),
+					HitParticle,
+					BoxHit.GetActor()->GetActorLocation(),
+					FRotator::ZeroRotator
+				);
+			}
+
 			OnSuccessfulHit(BoxHit.GetActor(), BoxHit);
 
 		}

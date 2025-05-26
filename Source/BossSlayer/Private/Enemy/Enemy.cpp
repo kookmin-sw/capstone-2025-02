@@ -92,6 +92,14 @@ void AEnemy::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
 	}
 }
 
+void AEnemy::SetHitParticle(UParticleSystem* Particle)
+{
+	if (Weapon)
+	{
+		Weapon->SetHitParticle(Particle);
+	}
+}
+
 void AEnemy::Attack()
 {
 	// To do

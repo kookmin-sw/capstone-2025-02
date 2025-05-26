@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
+#include "Particles/ParticleSystem.h"
 #include "Enemy.generated.h"
 
 class UStaticMeshComponent;
@@ -84,6 +85,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
+
+	UFUNCTION(BlueprintCallable)
+	void SetHitParticle(UParticleSystem* Particle);
 
 	UFUNCTION(BlueprintCallable)
 	void Attack();
