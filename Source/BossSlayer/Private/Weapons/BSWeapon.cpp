@@ -54,16 +54,20 @@ void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	{
 		if (IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor()))
 		{
-			
+
+			if (HitInterface->Execute_GetbIsInvincible(BoxHit.GetActor()))
+			{
+				return;
+			}
+
 			if (GEngine)
 			{
 				GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, TEXT("Success Hit"));
 			}
+
 			UE_LOG(LogTemp, Warning, TEXT("BoxHit Actor: %s"), *BoxHit.GetActor()->GetName());
 
 			HitInterface->Execute_GetHit(BoxHit.GetActor(), GetOwner(), BoxHit.ImpactPoint);
-
-			
 
 			OnSuccessfulHit(BoxHit.GetActor(), BoxHit);
 

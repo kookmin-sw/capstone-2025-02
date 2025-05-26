@@ -45,6 +45,9 @@ AEnemy::AEnemy()
 
 	MotionWarpingComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarpingComponent"));
 
+	// 0번 슬롯 기준으로 동적 머티리얼 생성
+	MeshMaterialInstance = GetMesh()->CreateAndSetMaterialInstanceDynamic(0);
+
 
 }
 
@@ -169,6 +172,11 @@ void AEnemy::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 	}
 
 	PlayHitReactMontage(SectionName);
+}
+
+bool AEnemy::GetbIsInvincible_Implementation() const
+{
+	return bIsInvincible;
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

@@ -25,7 +25,11 @@ public:
 	AEnemy();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	//~ Begin IHitInterface Interface.
 	virtual void GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint) override;
+	virtual bool GetbIsInvincible_Implementation() const override;
+	//~ End IHitInterface Interface.
 
 	//~ Begin AActor Interface.
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
@@ -91,7 +95,11 @@ protected:
 	void PlayAttackMontage(const FName& SectionName);
 
 private:
+	UPROPERTY()
+	UMaterialInstanceDynamic* MeshMaterialInstance;
 
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bIsInvincible = false;
 
 
 };

@@ -31,6 +31,7 @@ public:
 
 	//~ Begin IHitInterface Interface.
 	virtual void GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint) override;
+	virtual bool GetbIsInvincible_Implementation() const override;
 	//~ End IHitInterface Interface.
 
 	//~ Begin AActor Interface.

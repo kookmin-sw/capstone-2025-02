@@ -209,6 +209,11 @@ void ABSCharacter::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoin
 	}
 }
 
+bool ABSCharacter::GetbIsInvincible_Implementation() const
+{
+	return bIsInvincible;
+}
+
 float ABSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (Attribute)
