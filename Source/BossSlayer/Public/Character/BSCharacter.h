@@ -40,6 +40,9 @@ public:
 
 	FORCEINLINE bool GetIsInvincible() { return bIsInvincible; }
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetGameOverUI();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -126,6 +129,8 @@ private:
 	UAnimMontage* HitReactMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* HealMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* DieMontage;
 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TArray<FName> AttackMontageSections;
@@ -172,4 +177,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* PotionMesh;
+
+	
 };

@@ -225,7 +225,15 @@ float ABSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 
 	if (Attribute->IsDead())
 	{
-		// TODO : Dead();
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+		if (AnimInstance && DieMontage)
+		{
+			AnimInstance->Montage_Play(DieMontage);
+		}
+
+		//GetController()->UnPossess();
+		SetGameOverUI();
 	}
 	
 	return 0.0f;

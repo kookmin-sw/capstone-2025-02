@@ -8,6 +8,7 @@
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Weapons/BSWeapon.h"
 #include "GameFunctionLibrary.h"
 #include "Character/CharacterStates.h"
@@ -17,6 +18,7 @@
 #include "MotionWarpingComponent.h"
 #include "Controllers/BSAiController.h"
 #include "Components/CapsuleComponent.h"
+#include "Character/BSCharacter.h"
 
 
 #include "Utils/Debug.h"
@@ -131,7 +133,7 @@ void AEnemy::Die()
 
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 	{
-		if (DeathMontage) 
+		if (DeathMontage)
 		{
 			float Duration = AnimInstance->Montage_Play(DeathMontage);
 			SetLifeSpan(Duration + 0.5f);
@@ -143,6 +145,10 @@ void AEnemy::Die()
 		AiController->StopMovement();
 	}
 
+	if (ABSCharacter* Chr = Cast<ABSCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		Chr->SetGameOverUI();
+	}
 }
 
 void AEnemy::PlayHitReactMontage(const FName& SectionName)
@@ -197,7 +203,7 @@ void AEnemy::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 		}
 	}
 
-	// ÀÏÁ¤ ½Ã°£ ÈÄ ´Ù½Ã 0À¸·Î
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ ï¿½Ù½ï¿½ 0ï¿½ï¿½ï¿½ï¿½
 	FTimerHandle FlashTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(FlashTimerHandle, [this]()
 		{
