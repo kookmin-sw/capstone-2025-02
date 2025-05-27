@@ -209,31 +209,36 @@ void ABSCharacter::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoin
 	}
 }
 
+bool ABSCharacter::GetbIsInvincible_Implementation() const
+{
+	return bIsInvincible;
+}
+
 float ABSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (Attribute)
 	{
-		if (APlayerController* PC = Cast<APlayerController>(GetController()))
-		{
-			if (ABSHUD* Hud = Cast<ABSHUD>(PC->GetHUD()))
-			{
-				if (UBSOverlay* Overlay = Hud->GetBSOverlay())
-				{
-					
-					Attribute->ReceiveDamage(DamageAmount);
-					
-					
-					Overlay->SetHealthBarPercent(Attribute->GetHealthPercent());
+		Attribute->ReceiveDamage(DamageAmount);
+	}
 
-					if (Attribute->IsDead())
-					{
-						// TODO : Dead();
-					}
-				}
-			}
+	UpdateHUD();
+
+	if (Attribute->IsDead())
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+		if (AnimInstance && DieMontage)
+		{
+			AnimInstance->Montage_Play(DieMontage);
 		}
 
+		if (APlayerController* PC = GetController<APlayerController>())
+		{
+			this->DisableInput(PC);
+		}
+		SetGameOverUI();
 	}
+	
 	return 0.0f;
 }
 
@@ -393,7 +398,11 @@ void ABSCharacter::Heal_Implementation()
 
 void ABSCharacter::HealEnd_Implementation()
 {
+	float HealAmount = 30.f;
+	ApplyHealing(HealAmount);
+
 	Attribute->UseHealItem();
+
 	PotionMesh->SetVisibility(false);
 
 	CharacterState = ECharacterState::ECS_Neutral;
@@ -519,6 +528,28 @@ void ABSCharacter::DisableStun(UAnimMontage* Montage, bool bInterrupted)
 
 	Controller->SetIgnoreMoveInput(false);
 	CharacterState = ECharacterState::ECS_Neutral;
+}
+
+void ABSCharacter::UpdateHUD()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if (ABSHUD* Hud = Cast<ABSHUD>(PC->GetHUD()))
+		{
+			if (UBSOverlay* Overlay = Hud->GetBSOverlay())
+			{
+				Overlay->SetHealthBarPercent(Attribute->GetHealthPercent());
+			}
+		}
+	}
+}
+
+void ABSCharacter::ApplyHealing(float HealAmount)
+{
+	if (!Attribute || HealAmount <= 0.f) return;
+
+	Attribute->ChangeHealth(HealAmount);
+	UpdateHUD();
 }
 
 void ABSCharacter::EnableStun()

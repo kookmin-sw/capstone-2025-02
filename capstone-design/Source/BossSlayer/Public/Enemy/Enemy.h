@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/HitInterface.h"
+#include "Particles/ParticleSystem.h"
 #include "Enemy.generated.h"
 
 class UStaticMeshComponent;
@@ -25,7 +26,11 @@ public:
 	AEnemy();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	//~ Begin IHitInterface Interface.
 	virtual void GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint) override;
+	virtual bool GetbIsInvincible_Implementation() const override;
+	//~ End IHitInterface Interface.
 
 	//~ Begin AActor Interface.
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
@@ -76,10 +81,13 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void SpawnAndEquipWeapon(const FName SocketName);
-
+	
 
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled);
+
+	UFUNCTION(BlueprintCallable)
+	void SetHitParticle(UParticleSystem* Particle);
 
 	UFUNCTION(BlueprintCallable)
 	void Attack();
@@ -91,7 +99,11 @@ protected:
 	void PlayAttackMontage(const FName& SectionName);
 
 private:
+	UPROPERTY()
+	TArray<UMaterialInstanceDynamic*> DynamicMaterials;
 
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bIsInvincible = false;
 
 
 };

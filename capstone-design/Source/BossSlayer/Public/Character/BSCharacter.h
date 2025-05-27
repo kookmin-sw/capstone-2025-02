@@ -31,6 +31,7 @@ public:
 
 	//~ Begin IHitInterface Interface.
 	virtual void GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint) override;
+	virtual bool GetbIsInvincible_Implementation() const override;
 	//~ End IHitInterface Interface.
 
 	//~ Begin AActor Interface.
@@ -38,6 +39,9 @@ public:
 	//~ End AActor Interface
 
 	FORCEINLINE bool GetIsInvincible() { return bIsInvincible; }
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetGameOverUI();
 
 protected:
 	// Called when the game starts or when spawned
@@ -84,6 +88,13 @@ protected:
 	UFUNCTION()
 	FORCEINLINE void SetIsInvincible(bool Flag) { bIsInvincible = Flag; }
 
+	/* HUD */
+	UFUNCTION()
+	void UpdateHUD();
+
+	UFUNCTION()
+	void ApplyHealing(float HealAmount);
+
 	/* Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UInputAction* RollAction;
@@ -118,6 +129,8 @@ private:
 	UAnimMontage* HitReactMontage;
 	UPROPERTY(EditDefaultsOnly, Category = Montages)
 	UAnimMontage* HealMontage;
+	UPROPERTY(EditDefaultsOnly, Category = Montages)
+	UAnimMontage* DieMontage;
 
 	UPROPERTY(EditAnywhere, Category = Montages)
 	TArray<FName> AttackMontageSections;
@@ -164,4 +177,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* PotionMesh;
+
+	
 };

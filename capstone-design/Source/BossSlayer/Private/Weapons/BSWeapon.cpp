@@ -47,6 +47,9 @@ void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	if (OtherActor == GetOwner())
 		return;
 
+	if (IgnoreActors.Contains(OtherActor))
+		return;
+
 	FHitResult BoxHit;
 	BoxTrace(BoxHit);
 
@@ -54,16 +57,31 @@ void ABSWeapon::OnCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedCompon
 	{
 		if (IHitInterface* HitInterface = Cast<IHitInterface>(BoxHit.GetActor()))
 		{
-			
+
+			if (HitInterface->Execute_GetbIsInvincible(BoxHit.GetActor()))
+			{
+				return;
+			}
+
 			if (GEngine)
 			{
 				GEngine->AddOnScreenDebugMessage(1, 5.f, FColor::Red, TEXT("Success Hit"));
 			}
+
 			UE_LOG(LogTemp, Warning, TEXT("BoxHit Actor: %s"), *BoxHit.GetActor()->GetName());
 
 			HitInterface->Execute_GetHit(BoxHit.GetActor(), GetOwner(), BoxHit.ImpactPoint);
 
-			
+
+			if (HitParticle)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(
+					GetWorld(),
+					HitParticle,
+					BoxHit.GetActor()->GetActorLocation(),
+					FRotator::ZeroRotator
+				);
+			}
 
 			OnSuccessfulHit(BoxHit.GetActor(), BoxHit);
 
@@ -90,8 +108,8 @@ void ABSWeapon::BoxTrace(FHitResult& BoxHit)
 	const FVector End = BoxTraceEnd->GetComponentLocation();
 
 	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(this);
-	ActorsToIgnore.Add(GetOwner());
+	ActorsToIgnore.AddUnique(this);
+	ActorsToIgnore.AddUnique(GetOwner());
 
 	for (AActor* Actor : IgnoreActors)
 	{

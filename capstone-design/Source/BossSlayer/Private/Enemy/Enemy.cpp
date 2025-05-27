@@ -8,6 +8,7 @@
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Weapons/BSWeapon.h"
 #include "GameFunctionLibrary.h"
 #include "Character/CharacterStates.h"
@@ -17,6 +18,7 @@
 #include "MotionWarpingComponent.h"
 #include "Controllers/BSAiController.h"
 #include "Components/CapsuleComponent.h"
+#include "Character/BSCharacter.h"
 
 
 #include "Utils/Debug.h"
@@ -56,6 +58,25 @@ void AEnemy::BroadcastAttackEnded()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	if (HealthBarComponent)
+	{
+		HealthBarComponent->SetHealthPercent(AttributeComponent->GetHealthPercent());
+	}
+
+	if (GetMesh())
+	{
+		int32 MaterialCount = GetMesh()->GetNumMaterials();
+		for (int32 i = 0; i < MaterialCount; ++i)
+		{
+			UMaterialInterface* Mat = GetMesh()->GetMaterial(i);
+			if (Mat)
+			{
+				UMaterialInstanceDynamic* DynMat = UMaterialInstanceDynamic::Create(Mat, this);
+				GetMesh()->SetMaterial(i, DynMat);
+				DynamicMaterials.Add(DynMat);
+			}
+		}
+	}
 
 }
 
@@ -89,6 +110,14 @@ void AEnemy::SetWeaponCollisionEnabled(ECollisionEnabled::Type CollisionEnabled)
 	}
 }
 
+void AEnemy::SetHitParticle(UParticleSystem* Particle)
+{
+	if (Weapon)
+	{
+		Weapon->SetHitParticle(Particle);
+	}
+}
+
 void AEnemy::Attack()
 {
 	// To do
@@ -104,7 +133,7 @@ void AEnemy::Die()
 
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 	{
-		if (DeathMontage) 
+		if (DeathMontage)
 		{
 			float Duration = AnimInstance->Montage_Play(DeathMontage);
 			SetLifeSpan(Duration + 0.5f);
@@ -116,6 +145,10 @@ void AEnemy::Die()
 		AiController->StopMovement();
 	}
 
+	if (ABSCharacter* Chr = Cast<ABSCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		Chr->SetGameOverUI();
+	}
 }
 
 void AEnemy::PlayHitReactMontage(const FName& SectionName)
@@ -156,11 +189,32 @@ void AEnemy::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 {
 	if (!InAttacker)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GetHit: InAttacker is null!"));
+		UE_LOG(LogTemp, Warning, TEXT("GetHit: InAttacker is null"));
 		return;
 	}
 
 	FName SectionName = UGameFunctionLibrary::ComputeHitReactDirection(InAttacker, this);
+
+	for (UMaterialInstanceDynamic* DynMat : DynamicMaterials)
+	{
+		if (DynMat)
+		{
+			DynMat->SetScalarParameterValue("Damage", 0.1f);
+		}
+	}
+
+	// ���� �ð� �� �ٽ� 0����
+	FTimerHandle FlashTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(FlashTimerHandle, [this]()
+		{
+			for (UMaterialInstanceDynamic* DynMat : DynamicMaterials)
+			{
+				if (DynMat)
+				{
+					DynMat->SetScalarParameterValue("Damage", 0.0f);
+				}
+			}
+		}, 0.1f, false);
 
 	if (GEngine)
 	{
@@ -169,6 +223,13 @@ void AEnemy::GetHit_Implementation(AActor* InAttacker, FVector& ImpactPoint)
 	}
 
 	PlayHitReactMontage(SectionName);
+
+
+}
+
+bool AEnemy::GetbIsInvincible_Implementation() const
+{
+	return bIsInvincible;
 }
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

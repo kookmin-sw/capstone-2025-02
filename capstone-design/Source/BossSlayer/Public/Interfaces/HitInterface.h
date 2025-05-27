@@ -25,4 +25,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void GetHit(AActor* InAttacker, FVector& ImpactPoint);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	bool GetbIsInvincible() const;
 };
