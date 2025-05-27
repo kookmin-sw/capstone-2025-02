@@ -232,7 +232,10 @@ float ABSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 			AnimInstance->Montage_Play(DieMontage);
 		}
 
-		//GetController()->UnPossess();
+		if (APlayerController* PC = GetController<APlayerController>())
+		{
+			this->DisableInput(PC);
+		}
 		SetGameOverUI();
 	}
 	
